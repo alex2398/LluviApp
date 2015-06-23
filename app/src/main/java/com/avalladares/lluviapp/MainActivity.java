@@ -5,7 +5,8 @@ package com.avalladares.lluviapp;
 import android.content.Context;
         import android.content.IntentSender;
         import android.graphics.Color;
-        import android.graphics.drawable.Drawable;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
         import android.location.Location;
         import android.net.ConnectivityManager;
         import android.net.NetworkInfo;
@@ -60,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements
     // Nuevo metodo con ButterKnife
 
     @InjectView(R.id.temperatureLabel) TextView mTemperatureValue;
-    @InjectView(R.id.timeLabel) TextView mTimeLabel;
+    //@InjectView(R.id.timeLabel) TextView mTimeLabel;
     @InjectView(R.id.humidityValue) TextView mHumidityValue;
     @InjectView(R.id.precipValue) TextView mPrecipValue;
     @InjectView(R.id.summaryLabel) TextView mSummaryLabel;
@@ -241,7 +242,7 @@ public class MainActivity extends AppCompatActivity implements
         mTemperatureValue.setText(mCurrentWeather.getTemperature() + "");
         applyAnimation(Techniques.ZoomIn, 500, R.id.temperatureLabel);
 
-        mTimeLabel.setText("A las " + mCurrentWeather.getFormattedDate() + " el tiempo es ");
+        //mTimeLabel.setText("A las " + mCurrentWeather.getFormattedDate() + " el tiempo es ");
         mLastUpdateLabel.setText("Ultima actualizacion: " + mCurrentWeather.getFormattedTime());
         mHumidityValue.setText(mCurrentWeather.getHumidity() + "%");
         mPrecipValue.setText(mCurrentWeather.getPrecipChance() + "");
@@ -253,7 +254,9 @@ public class MainActivity extends AppCompatActivity implements
 
         // Usamos el método de la clase Color parseColor para convertirlo a entero
         int bgcolor=Color.parseColor((mCurrentWeather.getBgColor()));
-        mBackgroundLayout.setBackgroundColor(bgcolor);
+        //mBackgroundLayout.setBackgroundColor(bgcolor);
+
+        mBackgroundLayout.setBackgroundResource(R.drawable.sunny);
         applyAnimation(Techniques.FadeIn, 500, R.id.backgroundLayout);
 
     }

@@ -15,10 +15,14 @@
         android:layout_height="wrap_content"
         android:text="--"
         android:id="@+id/temperatureLabel"
+        android:shadowColor="@android:color/darker_gray"
+        android:shadowDx="1"
+        android:shadowDy="1"
+        android:shadowRadius="1"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
         android:textColor="@android:color/white"
-        android:textSize="100sp"/>
+        android:textSize="150sp"/>
 
     <ImageView
         android:layout_width="wrap_content"
@@ -34,23 +38,16 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="..."
-        android:id="@+id/timeLabel"
-        android:layout_above="@+id/temperatureLabel"
-        android:layout_centerHorizontal="true"
-        android:textColor="#80ffffff"
-        android:textSize="18sp"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="..."
         android:id="@+id/locationLabel"
-        android:layout_above="@+id/timeLabel"
+        android:shadowColor="@android:color/darker_gray"
+        android:shadowDx="1"
+        android:shadowDy="1"
+        android:shadowRadius="1"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="50dp"
         android:textColor="@android:color/white"
         android:textSize="24sp"
-        />
+        android:layout_above="@+id/temperatureLabel"/>
 
     <ImageView
         android:layout_width="wrap_content"
@@ -82,14 +79,23 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="% HUMEDAD"
+                android:shadowColor="@android:color/darker_gray"
+                android:shadowDx="1"
+                android:shadowDy="1"
+                android:shadowRadius="1"
                 android:id="@+id/humidityLabel"
-                android:textColor="#80ffffff"
+                android:textSize="20sp"
+                android:textColor="#ffffffff"
                 android:gravity="center_horizontal"/>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="--"
+                android:shadowColor="@android:color/darker_gray"
+                android:shadowDx="1"
+                android:shadowDy="1"
+                android:shadowRadius="1"
                 android:id="@+id/humidityValue"
                 android:textColor="@android:color/white"
                 android:textSize="24sp"
@@ -106,14 +112,23 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="LLUVIA"
+                android:shadowColor="@android:color/darker_gray"
+                android:shadowDx="1"
+                android:shadowDy="1"
+                android:shadowRadius="1"
                 android:id="@+id/precipLabel"
-                android:textColor="#80ffffff"
+                android:textSize="20sp"
+                android:textColor="#ffffffff"
                 android:gravity="center_horizontal"/>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="--"
+                android:shadowColor="@android:color/darker_gray"
+                android:shadowDx="1"
+                android:shadowDy="1"
+                android:shadowRadius="1"
                 android:id="@+id/precipValue"
                 android:textColor="@android:color/white"
                 android:textSize="24sp"
@@ -128,6 +143,10 @@
         android:id="@+id/summaryLabel"
         android:layout_below="@+id/linearLayout"
         android:layout_centerHorizontal="true"
+        android:shadowColor="@android:color/darker_gray"
+        android:shadowDx="1"
+        android:shadowDy="1"
+        android:shadowRadius="1"
         android:layout_marginTop="40dp"
         android:textColor="@android:color/white"
         android:textSize="18dp"
@@ -155,6 +174,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/lastUpdateLabel"
+        android:shadowColor="@android:color/darker_gray"
+        android:shadowDx="1"
+        android:shadowDy="1"
+        android:shadowRadius="1"
         android:layout_below="@+id/summaryLabel"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp"
