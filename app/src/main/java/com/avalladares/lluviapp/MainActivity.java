@@ -5,8 +5,7 @@ package com.avalladares.lluviapp;
 import android.content.Context;
         import android.content.IntentSender;
         import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
+        import android.graphics.drawable.Drawable;
         import android.location.Location;
         import android.net.ConnectivityManager;
         import android.net.NetworkInfo;
@@ -18,8 +17,6 @@ import android.graphics.drawable.Drawable;
         import android.widget.ProgressBar;
         import android.widget.RelativeLayout;
         import android.widget.TextView;
-
-        import com.avalladares.lluviapp.R;
         import com.daimajia.androidanimations.library.Techniques;
         import com.daimajia.androidanimations.library.YoYo;
         import com.google.android.gms.common.ConnectionResult;
@@ -61,7 +58,6 @@ public class MainActivity extends AppCompatActivity implements
     // Nuevo metodo con ButterKnife
 
     @InjectView(R.id.temperatureLabel) TextView mTemperatureValue;
-    //@InjectView(R.id.timeLabel) TextView mTimeLabel;
     @InjectView(R.id.humidityValue) TextView mHumidityValue;
     @InjectView(R.id.precipValue) TextView mPrecipValue;
     @InjectView(R.id.summaryLabel) TextView mSummaryLabel;
@@ -173,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements
                             toggleRefresh();
                         }
                     });
-                    alertUserAboutError("Sorry! there was an error");
+                    alertUserAboutError(getString(R.string.error_message));
                 }
 
                 @Override
@@ -243,20 +239,20 @@ public class MainActivity extends AppCompatActivity implements
         applyAnimation(Techniques.ZoomIn, 500, R.id.temperatureLabel);
 
         //mTimeLabel.setText("A las " + mCurrentWeather.getFormattedDate() + " el tiempo es ");
-        mLastUpdateLabel.setText("Ultima actualizacion: " + mCurrentWeather.getFormattedTime());
+        mLastUpdateLabel.setText(getString(R.string.last_update) + mCurrentWeather.getFormattedTime());
         mHumidityValue.setText(mCurrentWeather.getHumidity() + "%");
-        mPrecipValue.setText(mCurrentWeather.getPrecipChance() + "");
+        mPrecipValue.setText(mCurrentWeather.getPrecipChance() + "%");
         mSummaryLabel.setText(mCurrentWeather.getSummary() + "");
         Drawable drawable = getResources().getDrawable(mCurrentWeather.getIconId());
 
         mIconImageView.setImageDrawable(drawable);
         applyAnimation(Techniques.FadeIn, 1500, R.id.iconImageView);
 
-        // Usamos el método de la clase Color parseColor para convertirlo a entero
+        // Usamos el metodo de la clase Color parseColor para convertirlo a entero
         int bgcolor=Color.parseColor((mCurrentWeather.getBgColor()));
         //mBackgroundLayout.setBackgroundColor(bgcolor);
 
-        mBackgroundLayout.setBackgroundResource(R.drawable.sunny);
+        mBackgroundLayout.setBackgroundResource(mCurrentWeather.getBgPicture());
         applyAnimation(Techniques.FadeIn, 500, R.id.backgroundLayout);
 
     }

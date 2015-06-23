@@ -23,6 +23,16 @@ public class CurrentWeather {
     }
 
     String mBgColor;
+    int mBgPicture;
+
+    public int getBgPicture() {
+        return mBgPicture;
+    }
+
+    public void setBgPicture(int bgPicture) {
+        mBgPicture = bgPicture;
+    }
+
 
 
 
@@ -46,35 +56,46 @@ public class CurrentWeather {
         int iconId = R.mipmap.clear_day;
 
 
+
         if (mIcon.equals("clear-day")) {
             iconId = R.mipmap.clear_day;
+            mBgPicture=R.drawable.sunny_no_clouds;
             mBgColor = "#800081ff";
         } else if (mIcon.equals("clear-night")) {
             iconId = R.mipmap.clear_night;
+            mBgPicture=R.drawable.clear_night;
             mBgColor = "#f1022d53";
         } else if (mIcon.equals("rain")) {
             iconId = R.mipmap.rain;
+            mBgPicture=R.drawable.rainy;
             mBgColor = "40288DAB";
         } else if (mIcon.equals("snow")) {
             iconId = R.mipmap.snow;
+            mBgPicture=R.drawable.snow;
             mBgColor = "#406482ab";
         } else if (mIcon.equals("sleet")) {
             iconId = R.mipmap.sleet;
+            mBgPicture=R.drawable.sleet;
             mBgColor = "#406482ab";
         } else if (mIcon.equals("wind")) {
             iconId = R.mipmap.wind;
+            mBgPicture=R.drawable.windy;
             mBgColor = "#406482ab";
         } else if (mIcon.equals("fog")) {
             iconId = R.mipmap.fog;
+            mBgPicture=R.drawable.fog;
             mBgColor = "#406482ab";
         } else if (mIcon.equals("cloudy")) {
             iconId = R.mipmap.cloudy;
+            mBgPicture=R.drawable.cloudy;
             mBgColor = "#632D3F54";
         } else if (mIcon.equals("partly-cloudy-day")) {
             iconId = R.mipmap.partly_cloudy;
+            mBgPicture=R.drawable.sunny_cloudy;
             mBgColor = "#406482ab";
         } else if (mIcon.equals("partly-cloudy-night")) {
             iconId = R.mipmap.cloudy_night;
+            mBgPicture=R.drawable.cloudy_night;
             mBgColor = "CD273345";
         }
 
@@ -109,8 +130,8 @@ public class CurrentWeather {
         return timeString;
     }
 
-    public double getHumidity() {
-        return mHumidity;
+    public int getHumidity() {
+        return (int) Math.round(mHumidity * 100);
     }
 
     public void setHumidity(double humidity) {

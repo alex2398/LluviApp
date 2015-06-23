@@ -11,5 +11,10 @@
         AIzaSyARl4U-xix47FwZlPNOeYWDjp7yDr3Wpfs
     </string>
     <string name="openstreemaps_key" translatable="false">c5dd7f562e2145c8ea2bb1a2949ce44f</string>
+    <string name="humidity">HUMIDITY</string>
+    <string name="rain_probability">RAIN PROB.</string>
+    <string name="getting_data">Collecting data ...</string>
+    <string name="last_update">Last update: </string>
+    <string name="error_message">Sorry! there was an error</string>
 
 </resources>
