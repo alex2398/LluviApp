@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">LluviApp</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings" translatable="false">Settings</string>
+    <string name="title_Error">Oops! Sorry!</string>
+    <string name="error_Message">Sorry, there was an error</string>
+    <string name="ok_Button">OK</string>
+    <string name="noNetworkMessage">Network is unavailable!</string>
+    <string name="google_maps_key" translatable="false" templateMergeStrategy="preserve">
+        AIzaSyARl4U-xix47FwZlPNOeYWDjp7yDr3Wpfs
+    </string>
+    <string name="openstreemaps_key" translatable="false">c5dd7f562e2145c8ea2bb1a2949ce44f</string>
+
+</resources>

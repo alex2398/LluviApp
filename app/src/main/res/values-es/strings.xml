@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">LluviApp</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="title_Error">Oops! Lo sentimos!</string>
+    <string name="error_Message">Lo sentimos, hubo un error</string>
+    <string name="ok_Button">OK</string>
+    <string name="noNetworkMessage">Conexión a internet no disponible</string>
+
+</resources>
