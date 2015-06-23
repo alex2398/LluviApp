@@ -5,17 +5,13 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.IntentSender;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.StrictMode;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -42,11 +38,6 @@ import com.squareup.okhttp.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.Random;
 
 import butterknife.ButterKnife;
@@ -106,6 +97,7 @@ public class MainActivity extends Activity implements
     TextView mCityLabel;
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -137,6 +129,7 @@ public class MainActivity extends Activity implements
                 applyAnimation(Techniques.BounceIn, 200, R.id.refreshImageView);
                 getDataAllData();
 
+
             }
         });
 
@@ -145,13 +138,8 @@ public class MainActivity extends Activity implements
     // Method for getting forecast and location data
     private void getDataAllData() {
 
-
         getForecast();
         getLocation(currentLatitude, currentLongitude);
-
-
-
-
 
     }
 
@@ -162,8 +150,6 @@ public class MainActivity extends Activity implements
         getJSONData(locationUrl, "location");
     }
 
-
-
     // Method for getting forecast data from forecast.io
     private void getForecast() {
         String apiKey = "27974c4bc33201748eaf542a6769c3b7";
@@ -171,8 +157,8 @@ public class MainActivity extends Activity implements
                 "/" + currentLatitude + "," + currentLongitude + "?units=auto&lang=es";
         getJSONData(forecastUrl, "weather");
     }
-
-    private void getBackground() {
+/*
+    private void getBackgroundFlickr() {
         String apiKey = "b800034851ef22708d4bf96f2df557f2";
         Log.d(TAG, "ALEX");
 
@@ -183,6 +169,9 @@ public class MainActivity extends Activity implements
         getJSONData(flickrUrl,"background");
 
     }
+*/
+
+
     // Method for getting JSON data
     // Parameters:
     // Url (String) : url for retrieving JSON data
@@ -270,7 +259,7 @@ public class MainActivity extends Activity implements
                                     }
 
                                     if (method.equals("background")) {
-                                        updateBackgroundUI();
+                                        updateBackgroundUIFlickr();
                                     }
                                 }
                             });
@@ -366,10 +355,10 @@ public class MainActivity extends Activity implements
         Drawable drawable = getResources().getDrawable(mCurrentWeather.getIconId());
         mIconImageView.setImageDrawable(drawable);
         applyAnimation(Techniques.FadeIn, 1500, R.id.iconImageView);
-/*
-        Drawable drawable1 = getResources().getDrawable(mCurrentWeather.getBgId());
-        mBackgroundLayout.setBackground(drawable1);
-  */
+
+        Drawable draw = getResources().getDrawable(mCurrentWeather.getBgId());
+        mBackgroundLayout.setBackground(draw);
+        applyAnimation(Techniques.FadeIn, 500, R.id.backgroundLayout);
 
     }
 
@@ -381,15 +370,9 @@ public class MainActivity extends Activity implements
         mCityLabel.setText(mCurrentLocation.getCity() + "");
         applyAnimation(Techniques.FadeIn, 400, R.id.cityLabel);
 
-
-
-
         }
 
-
-
-
-    private void updateBackgroundUI() {
+    private void updateBackgroundUIFlickr() {
         AQuery aq = new AQuery(this);
 
         String url = mFlickrImages.getUrlImage();
@@ -407,11 +390,10 @@ public class MainActivity extends Activity implements
             }
         });
 
-        //mBackgroundLayout.sets.setImageURI(Uri.parse("http://blog.sptechnolab.com/wp-content/uploads/2011/02/c2.jpg"));
-
         applyAnimation(Techniques.FadeIn, 500, R.id.backgroundLayout);
 
     }
+
     // Method for using animations in a resource
     // Parameters:
     // technique (Technique)
@@ -423,7 +405,6 @@ public class MainActivity extends Activity implements
                 .playOn(findViewById(view));
 
     }
-//https://api.flickr.com/services/rest/?&method=flickr.photos.search&api_key=b800034851ef22708d4bf96f2df557f2&per_page=50&tags=rain+rainy+lluvia&tagmode=all&text=rain&has_geo=1&extras=geo,&accuracy=11&tags&lat=37.196815&lon=-3.641792&radius=20&format=json&extras=url_c,tags,geo,jsoncallback=
     // Method getCurrentLocation: Obtains location data using JSON returned string
     // Returns CurrentLocation object
 
@@ -470,6 +451,7 @@ public class MainActivity extends Activity implements
         currentWeather.setSummary(summary);
         currentWeather.setTemperature(temperature);
         currentWeather.setTimeZone(timezone);
+
 
         weatherTag = summary;
 
@@ -530,7 +512,7 @@ public class MainActivity extends Activity implements
         } else {
             getLongLat(location);
             getDataAllData();
-            getBackground();
+
         }
 
     }
