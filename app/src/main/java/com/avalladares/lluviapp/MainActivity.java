@@ -47,12 +47,15 @@ public class MainActivity extends AppCompatActivity implements
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
+
     public static final String TAG = MainActivity.class.getSimpleName();
+
     private double currentLongitude;
     private double currentLatitude;
 
     private CurrentWeather mCurrentWeather;
     private CurrentLocation mCurrentLocation;
+
     private Location location;
 
     // Nuevo metodo con ButterKnife
@@ -74,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_main);
         ButterKnife.inject(this);
 
+        // Create Google API Client
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
@@ -87,10 +91,10 @@ public class MainActivity extends AppCompatActivity implements
                 .setInterval(10 * 1000)        // 10 seconds, in milliseconds
                 .setFastestInterval(2 * 1000); // 2 second, in milliseconds
 
-
+        // By default, set progressbar invisible
         mProgressBar.setVisibility(View.INVISIBLE);
 
-        // Creamos el metodo para pulsar el boton de actualizar
+        // Method for updating data on image click
         mRefreshImageView.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -101,19 +105,24 @@ public class MainActivity extends AppCompatActivity implements
 
     }
 
+    // Method for getting forecast and location data
     private void getDataAllData() {
         getForecast();
         getLocationCity(currentLongitude, currentLatitude);
     }
 
+    // Method for getting longitude and latitude
+    // Parameters:
+    // Longitude (double)
+    // Latitude (double)
     private void getLocationCity(double lon, double lat) {
         String requestOpenStreetMapUrl = "http://nominatim.openstreetmap.org/reverse?format=json&lat=" + lat + "&lon=" + lon;
-        Log.i(TAG, "url:: " + requestOpenStreetMapUrl);
         getJSONData(requestOpenStreetMapUrl, "city");
 
 
     }
 
+    // Method for getting forecast data from forecast.io
     private void getForecast() {
         String apiKey = "27974c4bc33201748eaf542a6769c3b7";
         String forecastUrl = "https://api.forecast.io/forecast/" + apiKey +
@@ -121,29 +130,22 @@ public class MainActivity extends AppCompatActivity implements
         getJSONData(forecastUrl, "weather");
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mGoogleApiClient.connect();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        if (mGoogleApiClient.isConnected()) {
-            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-            mGoogleApiClient.disconnect();
-        }
-    }
+    // Method for getting JSON data
+    // Parameters:
+    // Url (String) : url for retrieving JSON data
+    // dataType (String) :
+    //          "weather" for forecast
+    //          "city" for location
 
     private void getJSONData(String Url,String dataType) {
 
         final String mType=dataType;
 
-        // Primero verificamos si la red esta disponible
+        // Check network availability
         if (isNetworkAvailable()) {
 
+            // All interactivities with UI must go on main thread
+            // We toggle progressbar visibility
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -151,6 +153,7 @@ public class MainActivity extends AppCompatActivity implements
                 }
             });
 
+            // OkHttpClient for making http requests
             OkHttpClient client = new OkHttpClient();
             Request request = new Request.Builder()
                     .url(Url)
@@ -158,7 +161,8 @@ public class MainActivity extends AppCompatActivity implements
 
             Call call = client.newCall(request);
 
-            // Hacemos el request en otro thread distinto al principal con enqueue
+
+            // We make the request in another thread using enqueue() method
 
             call.enqueue(new Callback() {
                 @Override
@@ -183,6 +187,7 @@ public class MainActivity extends AppCompatActivity implements
                     try {
                         String jsondata = response.body().string();
 
+                        // Response OK
                         if (response.isSuccessful()) {
 
                             if (mType.equals("weather")) {
@@ -200,7 +205,7 @@ public class MainActivity extends AppCompatActivity implements
                                     }
                                 }
                             });
-
+                        // Response FAILS
                         } else {
                             alertUserAboutError(getString(R.string.error_Message));
                         }
@@ -209,18 +214,39 @@ public class MainActivity extends AppCompatActivity implements
                     }
                 }
             });
+        // If network is not available
         } else {
 
             alertUserAboutError(getString(R.string.noNetworkMessage));
         }
     }
 
+    // Methods for Google API Client
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // We remove all location updates (for what??)
+        if (mGoogleApiClient.isConnected()) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+            mGoogleApiClient.disconnect();
+        }
+    }
+
+
+    // Method for setting long and lat using location objetc
     private void getLongLat(Location location) {
 
         currentLongitude = location.getLongitude();
         currentLatitude = location.getLatitude();
     }
 
+    // Method for toggling progress bar visibility
     private void toggleRefresh() {
 
         if (mProgressBar.getVisibility() == (View.INVISIBLE)) {
@@ -233,12 +259,13 @@ public class MainActivity extends AppCompatActivity implements
 
     }
 
+    // Method for updating display data
+    // Animations added
     private void updateDisplay() {
 
         mTemperatureValue.setText(mCurrentWeather.getTemperature() + "");
         applyAnimation(Techniques.ZoomIn, 500, R.id.temperatureLabel);
 
-        //mTimeLabel.setText("A las " + mCurrentWeather.getFormattedDate() + " el tiempo es ");
         mLastUpdateLabel.setText(getString(R.string.last_update) + mCurrentWeather.getFormattedTime());
         mHumidityValue.setText(mCurrentWeather.getHumidity() + "%");
         mPrecipValue.setText(mCurrentWeather.getPrecipChance() + "%");
@@ -248,28 +275,32 @@ public class MainActivity extends AppCompatActivity implements
         mIconImageView.setImageDrawable(drawable);
         applyAnimation(Techniques.FadeIn, 1500, R.id.iconImageView);
 
-        // Usamos el metodo de la clase Color parseColor para convertirlo a entero
-        int bgcolor=Color.parseColor((mCurrentWeather.getBgColor()));
-        //mBackgroundLayout.setBackgroundColor(bgcolor);
-
-        mBackgroundLayout.setBackgroundResource(mCurrentWeather.getBgPicture());
+        mBackgroundLayout.setBackgroundResource(mCurrentWeather.getBgId());
         applyAnimation(Techniques.FadeIn, 500, R.id.backgroundLayout);
 
     }
 
-    private void applyAnimation(Techniques tecnique, int duration, int view) {
-        YoYo.with(tecnique)
+    // Method for using animations in a resource
+    // Parameters:
+    // technique (Technique)
+    // duration (int) animation duration (in ms)
+    // view (int) resource id
+    private void applyAnimation(Techniques technique, int duration, int view) {
+        YoYo.with(technique)
                 .duration(duration)
                 .playOn(findViewById(view));
 
     }
 
+    // Method for update city data in display
     private void updateCity() {
         mLocationLabel.setText(mCurrentLocation.getCity() + "");
         applyAnimation(Techniques.FadeIn,400,R.id.locationLabel);
 
     }
 
+    // Method getCurrentCity: Obtains city name using JSON returned string
+    // Returns CurrentLocation object
     private CurrentLocation getCurrentCity(String jsondata) throws JSONException {
         JSONObject data = new JSONObject(jsondata);
 
@@ -284,6 +315,8 @@ public class MainActivity extends AppCompatActivity implements
 
     }
 
+    // Method getCurrentWeather: Obtains forecast data using JSON returned string
+    // Returns CurrenWeather object
     private CurrentWeather getCurrentWeather(String jsondata) throws JSONException {
 
         JSONObject forecast = new JSONObject(jsondata);
@@ -310,14 +343,15 @@ public class MainActivity extends AppCompatActivity implements
         return currentWeather;
     }
 
-    // Metodo para verificar si la red esta disponible
+    // Method for check network availability
+    // Returns boolean true(available) or false (unavailable)
 
     private boolean isNetworkAvailable() {
         ConnectivityManager manager = (ConnectivityManager)
                 getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = manager.getActiveNetworkInfo();
         boolean isAvailable = false;
-        // Si existe una red y esta conectada devolvemos true
+        // If network exists and is connected return true
         if (networkInfo != null && networkInfo.isConnected()) {
             isAvailable = true;
         }
@@ -325,12 +359,17 @@ public class MainActivity extends AppCompatActivity implements
         return isAvailable;
     }
 
-    // Metodo para mostrar mensajes en pantalla
+    // Method for showing messages on display
+    // Parameters: error (String) Text to be shown in message body
     private void alertUserAboutError(String error) {
         AlertDialogFragment dialog = new AlertDialogFragment();
         dialog.setText(error);
         dialog.show(getFragmentManager(), "error_dialog");
     }
+
+    // Method for getting last location data on connected google services
+    // If no lastlocation is found, new request is done
+    // Otherwise we update lon, lat and forecast data
 
     @Override
     public void onConnected(Bundle bundle) {
@@ -349,12 +388,13 @@ public class MainActivity extends AppCompatActivity implements
     public void onConnectionSuspended(int i) {
 
     }
-
+    // Updates long and lat on location change
     @Override
     public void onLocationChanged(Location location) {
         getLongLat(location);
     }
 
+    // Show alert if google services are not connected
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
          /*
@@ -384,18 +424,3 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

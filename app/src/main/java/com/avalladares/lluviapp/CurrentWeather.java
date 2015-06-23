@@ -18,11 +18,6 @@ public class CurrentWeather {
     private double mTemperature;
     private String mTimeZone;
 
-    public String getBgColor() {
-        return mBgColor;
-    }
-
-    String mBgColor;
     int mBgPicture;
 
     public int getBgPicture() {
@@ -32,9 +27,6 @@ public class CurrentWeather {
     public void setBgPicture(int bgPicture) {
         mBgPicture = bgPicture;
     }
-
-
-
 
     public String getTimeZone() {
         return mTimeZone;
@@ -52,51 +44,103 @@ public class CurrentWeather {
         mIcon = icon;
     }
 
+    public int getBgId() {
+        int bgId=R.drawable.rainy;
+
+        if (mIcon.equals("clear-day")) {
+
+            bgId=R.drawable.sunny_no_clouds;
+
+        } else if (mIcon.equals("clear-night")) {
+
+            bgId=R.drawable.clear_night;
+
+        } else if (mIcon.equals("rain")) {
+
+            bgId=R.drawable.rainy;
+
+        } else if (mIcon.equals("snow")) {
+
+            bgId=R.drawable.snow;
+
+        } else if (mIcon.equals("sleet")) {
+
+            mBgPicture=R.drawable.sleet;
+
+        } else if (mIcon.equals("wind")) {
+
+            bgId=R.drawable.windy;
+
+        } else if (mIcon.equals("fog")) {
+
+            bgId=R.drawable.fog;
+
+        } else if (mIcon.equals("cloudy")) {
+
+            bgId=R.drawable.cloudy;
+
+        } else if (mIcon.equals("partly-cloudy-day")) {
+
+            bgId=R.drawable.sunny_cloudy;
+
+        } else if (mIcon.equals("partly-cloudy-night")) {
+
+            bgId=R.drawable.cloudy_night;
+
+        }
+
+        return bgId;
+
+    }
+
+
     public int getIconId() {
         int iconId = R.mipmap.clear_day;
+
+
 
 
 
         if (mIcon.equals("clear-day")) {
             iconId = R.mipmap.clear_day;
             mBgPicture=R.drawable.sunny_no_clouds;
-            mBgColor = "#800081ff";
+
         } else if (mIcon.equals("clear-night")) {
             iconId = R.mipmap.clear_night;
             mBgPicture=R.drawable.clear_night;
-            mBgColor = "#f1022d53";
+
         } else if (mIcon.equals("rain")) {
             iconId = R.mipmap.rain;
             mBgPicture=R.drawable.rainy;
-            mBgColor = "40288DAB";
+
         } else if (mIcon.equals("snow")) {
             iconId = R.mipmap.snow;
             mBgPicture=R.drawable.snow;
-            mBgColor = "#406482ab";
+
         } else if (mIcon.equals("sleet")) {
             iconId = R.mipmap.sleet;
             mBgPicture=R.drawable.sleet;
-            mBgColor = "#406482ab";
+
         } else if (mIcon.equals("wind")) {
             iconId = R.mipmap.wind;
             mBgPicture=R.drawable.windy;
-            mBgColor = "#406482ab";
+
         } else if (mIcon.equals("fog")) {
             iconId = R.mipmap.fog;
             mBgPicture=R.drawable.fog;
-            mBgColor = "#406482ab";
+
         } else if (mIcon.equals("cloudy")) {
             iconId = R.mipmap.cloudy;
             mBgPicture=R.drawable.cloudy;
-            mBgColor = "#632D3F54";
+
         } else if (mIcon.equals("partly-cloudy-day")) {
             iconId = R.mipmap.partly_cloudy;
             mBgPicture=R.drawable.sunny_cloudy;
-            mBgColor = "#406482ab";
+
         } else if (mIcon.equals("partly-cloudy-night")) {
             iconId = R.mipmap.cloudy_night;
             mBgPicture=R.drawable.cloudy_night;
-            mBgColor = "CD273345";
+
         }
 
         return iconId;

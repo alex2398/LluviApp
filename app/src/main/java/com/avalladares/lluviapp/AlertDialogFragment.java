@@ -10,8 +10,8 @@ import com.avalladares.lluviapp.R;
 
 /**
  * Created by avalladares on 19/06/2015.
- * Devuelve un objeto dialog con el titulo predeterminado,
- * el texto pasado por parametro y el boton de OK
+ * Returns an dialog object with default title (string resource),
+ * string parameter and an OK button
  */
 
 public class AlertDialogFragment extends DialogFragment {
