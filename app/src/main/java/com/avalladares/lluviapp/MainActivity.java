@@ -17,7 +17,9 @@ import android.content.Context;
         import android.widget.ProgressBar;
         import android.widget.RelativeLayout;
         import android.widget.TextView;
-        import com.daimajia.androidanimations.library.Techniques;
+import android.widget.Toast;
+
+import com.daimajia.androidanimations.library.Techniques;
         import com.daimajia.androidanimations.library.YoYo;
         import com.google.android.gms.common.ConnectionResult;
         import com.google.android.gms.common.api.GoogleApiClient;
@@ -34,8 +36,9 @@ import android.content.Context;
         import org.json.JSONObject;
 
         import java.io.IOException;
+import java.util.Locale;
 
-        import butterknife.ButterKnife;
+import butterknife.ButterKnife;
         import butterknife.InjectView;
 
 
@@ -45,6 +48,8 @@ public class MainActivity extends AppCompatActivity implements
         LocationListener        {
 
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
+    private final static String REQUEST_WEATHER="weather";
+    private final static String REQUEST_CITY="city";
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
 
@@ -116,9 +121,12 @@ public class MainActivity extends AppCompatActivity implements
     // Longitude (double)
     // Latitude (double)
     private void getLocationCity(double lon, double lat) {
-        String requestOpenStreetMapUrl = "http://nominatim.openstreetmap.org/reverse?format=json&lat=" + lat + "&lon=" + lon;
-        getJSONData(requestOpenStreetMapUrl, "city");
 
+        String locale= Locale.getDefault().getISO3Language().toUpperCase().substring(0,2);
+        String apiKey = getString(R.string.wunderground_key);
+
+        String Url = "http://api.wunderground.com/api/" + apiKey + "/conditions/lang:" + locale + "/q/" + lat + "," + lon + ".json";
+        getJSONData(Url, REQUEST_CITY);
 
     }
 
@@ -127,8 +135,11 @@ public class MainActivity extends AppCompatActivity implements
         String apiKey = "27974c4bc33201748eaf542a6769c3b7";
         String forecastUrl = "https://api.forecast.io/forecast/" + apiKey +
                 "/" + currentLatitude + "," + currentLongitude + "?units=auto&lang=es";
-        getJSONData(forecastUrl, "weather");
+        getJSONData(forecastUrl, REQUEST_WEATHER);
     }
+
+
+
 
     // Method for getting JSON data
     // Parameters:
@@ -190,17 +201,17 @@ public class MainActivity extends AppCompatActivity implements
                         // Response OK
                         if (response.isSuccessful()) {
 
-                            if (mType.equals("weather")) {
+                            if (mType.equals(REQUEST_WEATHER)) {
                                 mCurrentWeather = getCurrentWeather(jsondata);
-                            }else if (mType.equals("city")) {
+                            }else if (mType.equals(REQUEST_CITY)) {
                                 mCurrentLocation = getCurrentCity(jsondata);
                             }
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    if (mType.equals("weather")) {
+                                    if (mType.equals(REQUEST_WEATHER)) {
                                         updateDisplay();
-                                    }else if (mType.equals("city")) {
+                                    }else if (mType.equals(REQUEST_CITY)) {
                                         updateCity();
                                     }
                                 }
@@ -208,6 +219,7 @@ public class MainActivity extends AppCompatActivity implements
                         // Response FAILS
                         } else {
                             alertUserAboutError(getString(R.string.error_Message));
+
                         }
                     } catch (IOException | JSONException e) {
                         Log.e(TAG, "Exception caught: ", e);
@@ -218,6 +230,7 @@ public class MainActivity extends AppCompatActivity implements
         } else {
 
             alertUserAboutError(getString(R.string.noNetworkMessage));
+
         }
     }
 
@@ -266,7 +279,7 @@ public class MainActivity extends AppCompatActivity implements
         mTemperatureValue.setText(mCurrentWeather.getTemperature() + "");
         applyAnimation(Techniques.ZoomIn, 500, R.id.temperatureLabel);
 
-        mLastUpdateLabel.setText(getString(R.string.last_update) + mCurrentWeather.getFormattedTime());
+        mLastUpdateLabel.setText(getString(R.string.last_update) + " " + mCurrentWeather.getFormattedTime());
         mHumidityValue.setText(mCurrentWeather.getHumidity() + "%");
         mPrecipValue.setText(mCurrentWeather.getPrecipChance() + "%");
         mSummaryLabel.setText(mCurrentWeather.getSummary() + "");
@@ -275,7 +288,7 @@ public class MainActivity extends AppCompatActivity implements
         mIconImageView.setImageDrawable(drawable);
         applyAnimation(Techniques.FadeIn, 1500, R.id.iconImageView);
 
-        mBackgroundLayout.setBackgroundResource(mCurrentWeather.getBgId());
+        mBackgroundLayout.setBackgroundResource(mCurrentWeather.getBgPicture());
         applyAnimation(Techniques.FadeIn, 500, R.id.backgroundLayout);
 
     }
@@ -302,15 +315,22 @@ public class MainActivity extends AppCompatActivity implements
     // Method getCurrentCity: Obtains city name using JSON returned string
     // Returns CurrentLocation object
     private CurrentLocation getCurrentCity(String jsondata) throws JSONException {
-        JSONObject data = new JSONObject(jsondata);
 
-        JSONObject address = data.getJSONObject("address");
-        String location_city=address.getString("city");
+        JSONObject data = new JSONObject(jsondata);
+        JSONObject currentObservation = data.getJSONObject("current_observation");
+        JSONObject observationLocation = currentObservation.getJSONObject("observation_location");
+
+        String location_city=observationLocation.getString("city");
+
 
         CurrentLocation currentCity = new CurrentLocation();
 
-        currentCity.setCity(location_city);
 
+        if (location_city!=null) {
+            currentCity.setCity(location_city);
+        } else {
+            currentCity.setCity(getString(R.string.error_location));
+        }
         return currentCity;
 
     }
@@ -362,14 +382,12 @@ public class MainActivity extends AppCompatActivity implements
     // Method for showing messages on display
     // Parameters: error (String) Text to be shown in message body
     private void alertUserAboutError(String error) {
-        AlertDialogFragment dialog = new AlertDialogFragment();
+        /* AlertDialogFragment dialog = new AlertDialogFragment();
         dialog.setText(error);
         dialog.show(getFragmentManager(), "error_dialog");
+        */
+        Toast.makeText(this,error,Toast.LENGTH_LONG).show();
     }
-
-    // Method for getting last location data on connected google services
-    // If no lastlocation is found, new request is done
-    // Otherwise we update lon, lat and forecast data
 
     @Override
     public void onConnected(Bundle bundle) {
@@ -388,13 +406,12 @@ public class MainActivity extends AppCompatActivity implements
     public void onConnectionSuspended(int i) {
 
     }
-    // Updates long and lat on location change
+
     @Override
     public void onLocationChanged(Location location) {
         getLongLat(location);
     }
 
-    // Show alert if google services are not connected
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
          /*
@@ -424,3 +441,18 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

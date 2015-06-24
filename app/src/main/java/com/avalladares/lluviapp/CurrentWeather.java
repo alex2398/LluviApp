@@ -45,7 +45,7 @@ public class CurrentWeather {
     }
 
     public int getBgId() {
-        int bgId=R.drawable.rainy;
+        int bgId=R.drawable.sunny_no_clouds;
 
         if (mIcon.equals("clear-day")) {
 
