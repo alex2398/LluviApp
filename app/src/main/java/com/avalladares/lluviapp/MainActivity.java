@@ -4,9 +4,10 @@ package com.avalladares.lluviapp;
 
 import android.content.Context;
         import android.content.IntentSender;
-        import android.graphics.Color;
         import android.graphics.drawable.Drawable;
-        import android.location.Location;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
         import android.net.ConnectivityManager;
         import android.net.NetworkInfo;
         import android.os.Bundle;
@@ -17,9 +18,8 @@ import android.content.Context;
         import android.widget.ProgressBar;
         import android.widget.RelativeLayout;
         import android.widget.TextView;
-import android.widget.Toast;
-
-import com.daimajia.androidanimations.library.Techniques;
+        import android.widget.Toast;
+        import com.daimajia.androidanimations.library.Techniques;
         import com.daimajia.androidanimations.library.YoYo;
         import com.google.android.gms.common.ConnectionResult;
         import com.google.android.gms.common.api.GoogleApiClient;
@@ -31,14 +31,13 @@ import com.daimajia.androidanimations.library.Techniques;
         import com.squareup.okhttp.OkHttpClient;
         import com.squareup.okhttp.Request;
         import com.squareup.okhttp.Response;
-
         import org.json.JSONException;
         import org.json.JSONObject;
-
         import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
-
-import butterknife.ButterKnife;
+        import butterknife.ButterKnife;
         import butterknife.InjectView;
 
 
@@ -60,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements
 
     private CurrentWeather mCurrentWeather;
     private CurrentLocation mCurrentLocation;
+
 
     private Location location;
 
@@ -113,34 +113,22 @@ public class MainActivity extends AppCompatActivity implements
     // Method for getting forecast and location data
     private void getDataAllData() {
         getForecast();
-        getLocationCity(currentLongitude, currentLatitude);
+        getGoogleLocation();
     }
 
     // Method for getting longitude and latitude
     // Parameters:
     // Longitude (double)
     // Latitude (double)
-    private void getLocationCity(double lon, double lat) {
 
-        String locale= Locale.getDefault().getISO3Language().toUpperCase().substring(0,2);
-        String apiKey = getString(R.string.wunderground_key);
-
-        String Url = "http://api.wunderground.com/api/" + apiKey + "/conditions/lang:" + locale + "/q/" + lat + "," + lon + ".json";
-        getJSONData(Url, REQUEST_CITY);
-
-    }
 
     // Method for getting forecast data from forecast.io
     private void getForecast() {
         String apiKey = "27974c4bc33201748eaf542a6769c3b7";
         String forecastUrl = "https://api.forecast.io/forecast/" + apiKey +
                 "/" + currentLatitude + "," + currentLongitude + "?units=auto&lang=es";
-        getJSONData(forecastUrl, REQUEST_WEATHER);
+        getJSONData(forecastUrl);
     }
-
-
-
-
     // Method for getting JSON data
     // Parameters:
     // Url (String) : url for retrieving JSON data
@@ -148,9 +136,8 @@ public class MainActivity extends AppCompatActivity implements
     //          "weather" for forecast
     //          "city" for location
 
-    private void getJSONData(String Url,String dataType) {
+    private void getJSONData(String Url) {
 
-        final String mType=dataType;
 
         // Check network availability
         if (isNetworkAvailable()) {
@@ -201,23 +188,19 @@ public class MainActivity extends AppCompatActivity implements
                         // Response OK
                         if (response.isSuccessful()) {
 
-                            if (mType.equals(REQUEST_WEATHER)) {
                                 mCurrentWeather = getCurrentWeather(jsondata);
-                            }else if (mType.equals(REQUEST_CITY)) {
-                                mCurrentLocation = getCurrentCity(jsondata);
-                            }
+                                mCurrentLocation= getGoogleLocation();
+
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    if (mType.equals(REQUEST_WEATHER)) {
-                                        updateDisplay();
-                                    }else if (mType.equals(REQUEST_CITY)) {
-                                        updateCity();
-                                    }
+                                    updateDisplay();
+
                                 }
                             });
                         // Response FAILS
-                        } else {
+
+                    }else {
                             alertUserAboutError(getString(R.string.error_Message));
 
                         }
@@ -291,6 +274,11 @@ public class MainActivity extends AppCompatActivity implements
         mBackgroundLayout.setBackgroundResource(mCurrentWeather.getBgPicture());
         applyAnimation(Techniques.FadeIn, 500, R.id.backgroundLayout);
 
+        mLocationLabel.setText(mCurrentLocation.getCity() + "");
+        applyAnimation(Techniques.FadeIn,400,R.id.locationLabel);
+
+
+
     }
 
     // Method for using animations in a resource
@@ -305,35 +293,6 @@ public class MainActivity extends AppCompatActivity implements
 
     }
 
-    // Method for update city data in display
-    private void updateCity() {
-        mLocationLabel.setText(mCurrentLocation.getCity() + "");
-        applyAnimation(Techniques.FadeIn,400,R.id.locationLabel);
-
-    }
-
-    // Method getCurrentCity: Obtains city name using JSON returned string
-    // Returns CurrentLocation object
-    private CurrentLocation getCurrentCity(String jsondata) throws JSONException {
-
-        JSONObject data = new JSONObject(jsondata);
-        JSONObject currentObservation = data.getJSONObject("current_observation");
-        JSONObject observationLocation = currentObservation.getJSONObject("observation_location");
-
-        String location_city=observationLocation.getString("city");
-
-
-        CurrentLocation currentCity = new CurrentLocation();
-
-
-        if (location_city!=null) {
-            currentCity.setCity(location_city);
-        } else {
-            currentCity.setCity(getString(R.string.error_location));
-        }
-        return currentCity;
-
-    }
 
     // Method getCurrentWeather: Obtains forecast data using JSON returned string
     // Returns CurrenWeather object
@@ -439,6 +398,54 @@ public class MainActivity extends AppCompatActivity implements
           */
             Log.i(TAG, "Location services connection failed with code " + connectionResult.getErrorCode());
         }
+    }
+
+    public CurrentLocation getGoogleLocation() {
+        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+        String errorMessage = "";
+        List<Address> addresses = null;
+        CurrentLocation currentLocation = new CurrentLocation();
+        String mAddress="";
+        String mCountry="";
+        String mCity="";
+        String mStreet="";
+
+        try {
+            addresses = geocoder.getFromLocation(currentLatitude, currentLongitude, 1);
+        } catch (IOException e) {
+            Log.e(TAG, e.getMessage());
+            alertUserAboutError(e.getMessage());
+        } catch (IllegalArgumentException illegalArgumentException) {
+            alertUserAboutError("Coordenadas no validas");
+        }
+
+        if (addresses == null || addresses.size()  == 0) {
+            if (errorMessage.isEmpty()) {
+                errorMessage = "Direccion no encontrada";
+                Log.e(TAG, errorMessage);
+            }
+
+        } else {
+            Address address = addresses.get(0);
+
+            mAddress = address.getAddressLine(0);
+            mCountry = address.getCountryName();
+            mCity = address.getLocality();
+            mStreet = address.getThoroughfare();
+
+
+
+            Log.i(TAG, "Direccion encontrada");
+
+
+        }
+
+        currentLocation.setAddress(mAddress);
+        currentLocation.setCountry(mCountry);
+        currentLocation.setCity(mCity);
+        currentLocation.setStreet(mStreet);
+
+        return currentLocation;
     }
 }
 
