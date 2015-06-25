@@ -5,14 +5,12 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.os.Bundle;
-import android.widget.Toast;
-
-import com.avalladares.lluviapp.R;
 
 /**
  * Created by avalladares on 19/06/2015.
  * Returns an dialog object with default title (string resource),
  * string parameter and an OK button
+ * Finally deprecated: I prefer toast instead
  */
 
 public class AlertDialogFragment extends DialogFragment {

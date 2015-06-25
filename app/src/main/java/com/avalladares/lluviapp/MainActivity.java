@@ -1,80 +1,110 @@
 package com.avalladares.lluviapp;
 
 
-
+import android.app.Activity;
 import android.content.Context;
-        import android.content.IntentSender;
-        import android.graphics.drawable.Drawable;
-import android.location.Address;
-import android.location.Geocoder;
+import android.content.IntentSender;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
-        import android.net.ConnectivityManager;
-        import android.net.NetworkInfo;
-        import android.os.Bundle;
-        import android.support.v7.app.AppCompatActivity;
-        import android.util.Log;
-        import android.view.View;
-        import android.widget.ImageView;
-        import android.widget.ProgressBar;
-        import android.widget.RelativeLayout;
-        import android.widget.TextView;
-        import android.widget.Toast;
-        import com.daimajia.androidanimations.library.Techniques;
-        import com.daimajia.androidanimations.library.YoYo;
-        import com.google.android.gms.common.ConnectionResult;
-        import com.google.android.gms.common.api.GoogleApiClient;
-        import com.google.android.gms.location.LocationListener;
-        import com.google.android.gms.location.LocationRequest;
-        import com.google.android.gms.location.LocationServices;
-        import com.squareup.okhttp.Call;
-        import com.squareup.okhttp.Callback;
-        import com.squareup.okhttp.OkHttpClient;
-        import com.squareup.okhttp.Request;
-        import com.squareup.okhttp.Response;
-        import org.json.JSONException;
-        import org.json.JSONObject;
-        import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-        import butterknife.ButterKnife;
-        import butterknife.InjectView;
+import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.StrictMode;
+import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.androidquery.AQuery;
+import com.androidquery.callback.AjaxCallback;
+import com.androidquery.callback.AjaxStatus;
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.squareup.okhttp.Call;
+import com.squareup.okhttp.Callback;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
+import org.json.JSONException;
+import org.json.JSONObject;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Random;
+
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 
 
-public class MainActivity extends AppCompatActivity implements
+public class MainActivity extends Activity implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
-        LocationListener        {
+        LocationListener {
 
-    private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
-    private final static String REQUEST_WEATHER="weather";
-    private final static String REQUEST_CITY="city";
+    private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 1500;
+    private final static String REQUEST_WEATHER = "weather";
+    private final static String REQUEST_CITY = "city";
+    private final static String REQUEST_BACKGROUND="background";
+    public static final String TAG = MainActivity.class.getSimpleName();
+
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
-
-    public static final String TAG = MainActivity.class.getSimpleName();
 
     private double currentLongitude;
     private double currentLatitude;
 
     private CurrentWeather mCurrentWeather;
     private CurrentLocation mCurrentLocation;
+    private FlickrImages mFlickrImages;
 
+    public String weatherTag=null;
+    public String cityTag=null;
+    String pictureSizeUrl = "url_l";
 
     private Location location;
 
-    // Nuevo metodo con ButterKnife
+    // New ButterKnife method
 
-    @InjectView(R.id.temperatureLabel) TextView mTemperatureValue;
-    @InjectView(R.id.humidityValue) TextView mHumidityValue;
-    @InjectView(R.id.precipValue) TextView mPrecipValue;
-    @InjectView(R.id.summaryLabel) TextView mSummaryLabel;
-    @InjectView(R.id.iconImageView) ImageView mIconImageView;
-    @InjectView(R.id.refreshImageView) ImageView mRefreshImageView;
-    @InjectView(R.id.progressBar) ProgressBar mProgressBar;
-    @InjectView(R.id.locationLabel) TextView mLocationLabel;
-    @InjectView(R.id.lastUpdateLabel) TextView mLastUpdateLabel;
-    @InjectView(R.id.backgroundLayout) RelativeLayout mBackgroundLayout;
+    @InjectView(R.id.temperatureLabel)
+    TextView mTemperatureValue;
+    @InjectView(R.id.humidityValue)
+    TextView mHumidityValue;
+    @InjectView(R.id.precipValue)
+    TextView mPrecipValue;
+    @InjectView(R.id.summaryLabel)
+    TextView mSummaryLabel;
+    @InjectView(R.id.iconImageView)
+    ImageView mIconImageView;
+    @InjectView(R.id.refreshImageView)
+    ImageView mRefreshImageView;
+    @InjectView(R.id.progressBar)
+    ProgressBar mProgressBar;
+    @InjectView(R.id.locationLabel)
+    TextView mLocationLabel;
+    @InjectView(R.id.lastUpdateLabel)
+    TextView mLastUpdateLabel;
+    @InjectView(R.id.backgroundLayout)
+    RelativeLayout mBackgroundLayout;
+    @InjectView(R.id.cityLabel)
+    TextView mCityLabel;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements
         // Create the LocationRequest object
         mLocationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setInterval(10 * 1000)        // 10 seconds, in milliseconds
+                .setInterval(5 * 1000)        // 10 seconds, in milliseconds
                 .setFastestInterval(2 * 1000); // 2 second, in milliseconds
 
         // By default, set progressbar invisible
@@ -104,22 +134,40 @@ public class MainActivity extends AppCompatActivity implements
 
             @Override
             public void onClick(View v) {
+                applyAnimation(Techniques.BounceIn, 200, R.id.refreshImageView);
                 getDataAllData();
+
             }
         });
+
+
+
+
+
+
 
     }
 
     // Method for getting forecast and location data
     private void getDataAllData() {
+
+
         getForecast();
-        getGoogleLocation();
+        getLocation(currentLatitude, currentLongitude);
+
+
+
+
+
     }
 
-    // Method for getting longitude and latitude
-    // Parameters:
-    // Longitude (double)
-    // Latitude (double)
+    // Method for getting location using google maps
+    private void getLocation(double lat, double lon) {
+        //String apiKey = "27974c4bc33201748eaf542a6769c3b7";
+        String locationUrl = "http://maps.googleapis.com/maps/api/geocode/json?latlng=" + lat + "," + lon + "&sensor=false";
+        getJSONData(locationUrl, "location");
+    }
+
 
 
     // Method for getting forecast data from forecast.io
@@ -127,7 +175,19 @@ public class MainActivity extends AppCompatActivity implements
         String apiKey = "27974c4bc33201748eaf542a6769c3b7";
         String forecastUrl = "https://api.forecast.io/forecast/" + apiKey +
                 "/" + currentLatitude + "," + currentLongitude + "?units=auto&lang=es";
-        getJSONData(forecastUrl);
+        getJSONData(forecastUrl, "weather");
+    }
+
+    private void getBackground() {
+        String apiKey = "b800034851ef22708d4bf96f2df557f2";
+        Log.d(TAG, "ALEX");
+
+        String flickrUrl="https://api.flickr.com/services/rest/?&method=flickr.groups.pools.getPhotos&api_key=" + apiKey +
+                "&group_id=1463451@N25&tags=" + cityTag + "&extras=" + pictureSizeUrl +"&format=json&nojsoncallback=1";
+
+
+        getJSONData(flickrUrl,"background");
+
     }
     // Method for getting JSON data
     // Parameters:
@@ -136,7 +196,7 @@ public class MainActivity extends AppCompatActivity implements
     //          "weather" for forecast
     //          "city" for location
 
-    private void getJSONData(String Url) {
+    private void getJSONData(String Url, final String method) {
 
 
         // Check network availability
@@ -187,20 +247,42 @@ public class MainActivity extends AppCompatActivity implements
 
                         // Response OK
                         if (response.isSuccessful()) {
-
+                            if (method.equals("weather")) {
                                 mCurrentWeather = getCurrentWeather(jsondata);
-                                mCurrentLocation= getGoogleLocation();
+
+
+
+                            }
+                            if (method.equals("location")) {
+                                mCurrentLocation = getCurrentLocation(jsondata);
+
+                            }
+
+                            if (method.equals("background")) {
+
+                                mFlickrImages = getFlickrImages(jsondata);
+                            }
+
 
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    updateDisplay();
 
+                                    if (method.equals("weather")) {
+                                        updateWeatherUI();
+                                    }
+                                    if (method.equals("location")) {
+                                        updateLocationUI();
+                                    }
+
+                                    if (method.equals("background")) {
+                                        updateBackgroundUI();
+                                    }
                                 }
                             });
-                        // Response FAILS
+                            // Response FAILS
 
-                    }else {
+                        } else {
                             alertUserAboutError(getString(R.string.error_Message));
 
                         }
@@ -209,11 +291,16 @@ public class MainActivity extends AppCompatActivity implements
                     }
                 }
             });
-        // If network is not available
+            // If network is not available
         } else {
-
-            alertUserAboutError(getString(R.string.noNetworkMessage));
-
+            if (method.equals("weather")) {
+                alertUserAboutError("Error de red al obtener clima");
+                mSummaryLabel.setText("");
+            }
+            if (method.equals("location")) {
+                alertUserAboutError("Error de red al obtener ubicacion");
+                mSummaryLabel.setText("");
+            }
         }
     }
 
@@ -235,12 +322,27 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
-    // Method for setting long and lat using location objetc
+    // Method for setting long and lat using location object
     private void getLongLat(Location location) {
 
         currentLongitude = location.getLongitude();
         currentLatitude = location.getLatitude();
     }
+
+    // Method for getting longitude and latitude
+    // Parameters:
+    // Longitude (double)
+    // Latitude (double)
+    // Deprecated: obtained with google services
+
+    private void getlonglat_deprecated() {
+
+        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        Location location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        double longitude = location.getLongitude();
+        double latitude = location.getLatitude();
+    }
+
 
     // Method for toggling progress bar visibility
     private void toggleRefresh() {
@@ -255,9 +357,9 @@ public class MainActivity extends AppCompatActivity implements
 
     }
 
-    // Method for updating display data
+    // Method for updating display weather data
     // Animations added
-    private void updateDisplay() {
+    private void updateWeatherUI() {
 
         mTemperatureValue.setText(mCurrentWeather.getTemperature() + "");
         applyAnimation(Techniques.ZoomIn, 500, R.id.temperatureLabel);
@@ -266,21 +368,56 @@ public class MainActivity extends AppCompatActivity implements
         mHumidityValue.setText(mCurrentWeather.getHumidity() + "%");
         mPrecipValue.setText(mCurrentWeather.getPrecipChance() + "%");
         mSummaryLabel.setText(mCurrentWeather.getSummary() + "");
-        Drawable drawable = getResources().getDrawable(mCurrentWeather.getIconId());
 
+        Drawable drawable = getResources().getDrawable(mCurrentWeather.getIconId());
         mIconImageView.setImageDrawable(drawable);
         applyAnimation(Techniques.FadeIn, 1500, R.id.iconImageView);
-
-        mBackgroundLayout.setBackgroundResource(mCurrentWeather.getBgPicture());
-        applyAnimation(Techniques.FadeIn, 500, R.id.backgroundLayout);
-
-        mLocationLabel.setText(mCurrentLocation.getCity() + "");
-        applyAnimation(Techniques.FadeIn,400,R.id.locationLabel);
-
-
+/*
+        Drawable drawable1 = getResources().getDrawable(mCurrentWeather.getBgId());
+        mBackgroundLayout.setBackground(drawable1);
+  */
 
     }
 
+    // Method for updating display location data
+    private void updateLocationUI() {
+        mLocationLabel.setText(mCurrentLocation.getStreet() + "");
+        applyAnimation(Techniques.FadeIn, 400, R.id.locationLabel);
+
+        mCityLabel.setText(mCurrentLocation.getCity() + "");
+        applyAnimation(Techniques.FadeIn, 400, R.id.cityLabel);
+
+
+
+
+        }
+
+
+
+
+    private void updateBackgroundUI() {
+        AQuery aq = new AQuery(this);
+
+        String url = mFlickrImages.getUrlImage();
+        boolean memCache = false;
+        boolean fileCache = false;
+
+        //aq.id(mBackgroundLayout).image(url);
+
+        aq.ajax(url.trim(), Bitmap.class, 0, new AjaxCallback<Bitmap>() {
+            @Override
+            public void callback(String url, Bitmap object, AjaxStatus status) {
+                super.callback(url, object, status);
+                mBackgroundLayout.setBackground(new BitmapDrawable(object));
+
+            }
+        });
+
+        //mBackgroundLayout.sets.setImageURI(Uri.parse("http://blog.sptechnolab.com/wp-content/uploads/2011/02/c2.jpg"));
+
+        applyAnimation(Techniques.FadeIn, 500, R.id.backgroundLayout);
+
+    }
     // Method for using animations in a resource
     // Parameters:
     // technique (Technique)
@@ -292,10 +429,32 @@ public class MainActivity extends AppCompatActivity implements
                 .playOn(findViewById(view));
 
     }
+//https://api.flickr.com/services/rest/?&method=flickr.photos.search&api_key=b800034851ef22708d4bf96f2df557f2&per_page=50&tags=rain+rainy+lluvia&tagmode=all&text=rain&has_geo=1&extras=geo,&accuracy=11&tags&lat=37.196815&lon=-3.641792&radius=20&format=json&extras=url_c,tags,geo,jsoncallback=
+    // Method getCurrentLocation: Obtains location data using JSON returned string
+    // Returns CurrentLocation object
 
+    private CurrentLocation getCurrentLocation(String jsondata) throws JSONException {
+
+        JSONObject location = new JSONObject(jsondata);
+        String address = location.getJSONArray("results").getJSONObject(0).getJSONArray("address_components").getJSONObject(0).getString("short_name");
+        String street = location.getJSONArray("results").getJSONObject(0).getJSONArray("address_components").getJSONObject(1).getString("short_name");
+        String city = location.getJSONArray("results").getJSONObject(0).getJSONArray("address_components").getJSONObject(2).getString("short_name");
+        cityTag=city;
+        String country = location.getJSONArray("results").getJSONObject(0).getJSONArray("address_components").getJSONObject(4).getString("long_name");
+
+        CurrentLocation currentLocation = new CurrentLocation();
+
+        currentLocation.setCity(city);
+        currentLocation.setAddress(address);
+        currentLocation.setCountry(country);
+        currentLocation.setStreet(street);
+
+        return currentLocation;
+    }
 
     // Method getCurrentWeather: Obtains forecast data using JSON returned string
     // Returns CurrenWeather object
+
     private CurrentWeather getCurrentWeather(String jsondata) throws JSONException {
 
         JSONObject forecast = new JSONObject(jsondata);
@@ -308,7 +467,6 @@ public class MainActivity extends AppCompatActivity implements
         String summary = currently.getString("summary");
         double temperature = Math.round(currently.getDouble("temperature"));
 
-
         CurrentWeather currentWeather = new CurrentWeather();
 
         currentWeather.setIcon(icon);
@@ -319,7 +477,27 @@ public class MainActivity extends AppCompatActivity implements
         currentWeather.setTemperature(temperature);
         currentWeather.setTimeZone(timezone);
 
+        weatherTag = summary;
+
         return currentWeather;
+    }
+
+    private FlickrImages getFlickrImages(String jsondata) throws JSONException{
+
+        Random randomgenerator = new Random();
+
+        JSONObject bg = new JSONObject(jsondata);
+        int totalPictures = Integer.parseInt(bg.getJSONObject("photos").getString("total"));
+        int valor = randomgenerator.nextInt(totalPictures);
+
+        String photo = bg.getJSONObject("photos").getJSONArray("photo").getJSONObject(valor).getString(pictureSizeUrl);
+
+
+        FlickrImages flickrImages = new FlickrImages();
+
+        flickrImages.setUrlImage(photo);
+
+        return  flickrImages;
     }
 
     // Method for check network availability
@@ -328,6 +506,7 @@ public class MainActivity extends AppCompatActivity implements
     private boolean isNetworkAvailable() {
         ConnectivityManager manager = (ConnectivityManager)
                 getSystemService(Context.CONNECTIVITY_SERVICE);
+
         NetworkInfo networkInfo = manager.getActiveNetworkInfo();
         boolean isAvailable = false;
         // If network exists and is connected return true
@@ -340,12 +519,13 @@ public class MainActivity extends AppCompatActivity implements
 
     // Method for showing messages on display
     // Parameters: error (String) Text to be shown in message body
+    // Changed to use Toast instead
     private void alertUserAboutError(String error) {
         /* AlertDialogFragment dialog = new AlertDialogFragment();
         dialog.setText(error);
         dialog.show(getFragmentManager(), "error_dialog");
         */
-        Toast.makeText(this,error,Toast.LENGTH_LONG).show();
+        Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -353,10 +533,10 @@ public class MainActivity extends AppCompatActivity implements
         Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (location == null) {
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-        }
-        else {
+        } else {
             getLongLat(location);
             getDataAllData();
+            getBackground();
         }
 
     }
@@ -390,6 +570,7 @@ public class MainActivity extends AppCompatActivity implements
             } catch (IntentSender.SendIntentException e) {
                 // Log the error
                 e.printStackTrace();
+
             }
         } else {
          /*
@@ -400,66 +581,7 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    public CurrentLocation getGoogleLocation() {
-        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
-        String errorMessage = "";
-        List<Address> addresses = null;
-        CurrentLocation currentLocation = new CurrentLocation();
-        String mAddress="";
-        String mCountry="";
-        String mCity="";
-        String mStreet="";
-
-        try {
-            addresses = geocoder.getFromLocation(currentLatitude, currentLongitude, 1);
-        } catch (IOException e) {
-            Log.e(TAG, e.getMessage());
-            alertUserAboutError(e.getMessage());
-        } catch (IllegalArgumentException illegalArgumentException) {
-            alertUserAboutError("Coordenadas no validas");
-        }
-
-        if (addresses == null || addresses.size()  == 0) {
-            if (errorMessage.isEmpty()) {
-                errorMessage = "Direccion no encontrada";
-                Log.e(TAG, errorMessage);
-            }
-
-        } else {
-            Address address = addresses.get(0);
-
-            mAddress = address.getAddressLine(0);
-            mCountry = address.getCountryName();
-            mCity = address.getLocality();
-            mStreet = address.getThoroughfare();
 
 
 
-            Log.i(TAG, "Direccion encontrada");
-
-
-        }
-
-        currentLocation.setAddress(mAddress);
-        currentLocation.setCountry(mCountry);
-        currentLocation.setCity(mCity);
-        currentLocation.setStreet(mStreet);
-
-        return currentLocation;
-    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

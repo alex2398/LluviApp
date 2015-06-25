@@ -7,6 +7,8 @@ public class CurrentLocation {
 
     private String mAddress;
     private String mCountry;
+    private String mCity;
+    private String mStreet;
 
     public String getCountry() {
         return mCountry;
@@ -40,8 +42,6 @@ public class CurrentLocation {
         mAddress = address;
     }
 
-    private String mCity;
-    private String mStreet;
 
 
 

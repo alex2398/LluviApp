@@ -1,7 +1,5 @@
 package com.avalladares.lluviapp;
 
-import com.avalladares.lluviapp.R;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
@@ -18,15 +16,6 @@ public class CurrentWeather {
     private double mTemperature;
     private String mTimeZone;
 
-    int mBgPicture;
-
-    public int getBgPicture() {
-        return mBgPicture;
-    }
-
-    public void setBgPicture(int bgPicture) {
-        mBgPicture = bgPicture;
-    }
 
     public String getTimeZone() {
         return mTimeZone;
@@ -43,110 +32,6 @@ public class CurrentWeather {
     public void setIcon(String icon) {
         mIcon = icon;
     }
-
-    public int getBgId() {
-        int bgId=R.drawable.sunny_no_clouds;
-
-        if (mIcon.equals("clear-day")) {
-
-            bgId=R.drawable.sunny_no_clouds;
-
-        } else if (mIcon.equals("clear-night")) {
-
-            bgId=R.drawable.clear_night;
-
-        } else if (mIcon.equals("rain")) {
-
-            bgId=R.drawable.rainy;
-
-        } else if (mIcon.equals("snow")) {
-
-            bgId=R.drawable.snow;
-
-        } else if (mIcon.equals("sleet")) {
-
-            mBgPicture=R.drawable.sleet;
-
-        } else if (mIcon.equals("wind")) {
-
-            bgId=R.drawable.windy;
-
-        } else if (mIcon.equals("fog")) {
-
-            bgId=R.drawable.fog;
-
-        } else if (mIcon.equals("cloudy")) {
-
-            bgId=R.drawable.cloudy;
-
-        } else if (mIcon.equals("partly-cloudy-day")) {
-
-            bgId=R.drawable.sunny_cloudy;
-
-        } else if (mIcon.equals("partly-cloudy-night")) {
-
-            bgId=R.drawable.cloudy_night;
-
-        }
-
-        return bgId;
-
-    }
-
-
-    public int getIconId() {
-        int iconId = R.mipmap.clear_day;
-
-
-
-
-
-        if (mIcon.equals("clear-day")) {
-            iconId = R.mipmap.clear_day;
-            mBgPicture=R.drawable.sunny_no_clouds;
-
-        } else if (mIcon.equals("clear-night")) {
-            iconId = R.mipmap.clear_night;
-            mBgPicture=R.drawable.clear_night;
-
-        } else if (mIcon.equals("rain")) {
-            iconId = R.mipmap.rain;
-            mBgPicture=R.drawable.rainy;
-
-        } else if (mIcon.equals("snow")) {
-            iconId = R.mipmap.snow;
-            mBgPicture=R.drawable.snow;
-
-        } else if (mIcon.equals("sleet")) {
-            iconId = R.mipmap.sleet;
-            mBgPicture=R.drawable.sleet;
-
-        } else if (mIcon.equals("wind")) {
-            iconId = R.mipmap.wind;
-            mBgPicture=R.drawable.windy;
-
-        } else if (mIcon.equals("fog")) {
-            iconId = R.mipmap.fog;
-            mBgPicture=R.drawable.fog;
-
-        } else if (mIcon.equals("cloudy")) {
-            iconId = R.mipmap.cloudy;
-            mBgPicture=R.drawable.cloudy;
-
-        } else if (mIcon.equals("partly-cloudy-day")) {
-            iconId = R.mipmap.partly_cloudy;
-            mBgPicture=R.drawable.sunny_cloudy;
-
-        } else if (mIcon.equals("partly-cloudy-night")) {
-            iconId = R.mipmap.cloudy_night;
-            mBgPicture=R.drawable.cloudy_night;
-
-        }
-
-        return iconId;
-
-    }
-
 
     public long getTime() {
         return mTime;
@@ -165,7 +50,7 @@ public class CurrentWeather {
         return timeString;
     }
 
-    public String getFormattedTime (){
+    public String getFormattedTime () {
         SimpleDateFormat formatter = new SimpleDateFormat("h:mm a");
         formatter.setTimeZone(TimeZone.getTimeZone(mTimeZone));
         Date dateTime = new Date(mTime * 1000);
@@ -204,5 +89,85 @@ public class CurrentWeather {
 
     public void setTemperature(double temperature) {
         mTemperature = temperature;
+    }
+
+    public int getBgId() {
+        int bgId=R.drawable.sunny_no_clouds;
+
+        switch (mIcon) {
+            case "clear-day":
+                bgId = R.drawable.sunny_no_clouds;
+                break;
+            case "clear-night":
+                bgId = R.drawable.clear_night;
+                break;
+            case "rain":
+                bgId = R.drawable.rainy;
+                break;
+            case "snow":
+                bgId = R.drawable.snow;
+                break;
+            case "sleet":
+                bgId = R.drawable.sleet;
+                break;
+            case "wind":
+                bgId = R.drawable.windy;
+                break;
+            case "fog":
+                bgId = R.drawable.fog;
+                break;
+            case "cloudy":
+                bgId = R.drawable.cloudy;
+                break;
+            case "partly-cloudy-day":
+                bgId = R.drawable.sunny_cloudy;
+                break;
+            case "partly-cloudy-night":
+                bgId = R.drawable.cloudy_night;
+                break;
+        }
+
+        return bgId;
+
+    }
+
+    public int getIconId() {
+        int iconId = R.mipmap.clear_day;
+
+        switch (mIcon) {
+            case "clear-day":
+                iconId = R.mipmap.clear_day;
+                break;
+            case "clear-night":
+                iconId = R.mipmap.clear_night;
+                break;
+            case "rain":
+                iconId = R.mipmap.rain;
+                break;
+            case "snow":
+                iconId = R.mipmap.snow;
+                break;
+            case "sleet":
+                iconId = R.mipmap.sleet;
+                break;
+            case "wind":
+                iconId = R.mipmap.wind;
+                break;
+            case "fog":
+                iconId = R.mipmap.fog;
+                break;
+            case "cloudy":
+                iconId = R.mipmap.cloudy;
+                break;
+            case "partly-cloudy-day":
+                iconId = R.mipmap.partly_cloudy;
+                break;
+            case "partly-cloudy-night":
+                iconId = R.mipmap.cloudy_night;
+                break;
+        }
+
+        return iconId;
+
     }
 }
