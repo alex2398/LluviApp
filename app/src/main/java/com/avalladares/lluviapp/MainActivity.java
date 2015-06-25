@@ -140,12 +140,6 @@ public class MainActivity extends Activity implements
             }
         });
 
-
-
-
-
-
-
     }
 
     // Method for getting forecast and location data
