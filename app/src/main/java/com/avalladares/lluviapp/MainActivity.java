@@ -134,6 +134,7 @@ public class MainActivity extends Activity implements
 
         // By default, set progressbar invisible
         mProgressBar.setVisibility(View.INVISIBLE);
+        mRefreshImageView.setVisibility(View.INVISIBLE);
 
         // Method for updating data on image click
         mRefreshImageView.setOnClickListener(new View.OnClickListener() {
@@ -512,11 +513,13 @@ public class MainActivity extends Activity implements
 
     @Override
     public void onConnected(Bundle bundle) {
+        /*
         try {
             Thread.sleep(3000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        */
         Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (location == null) {
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
