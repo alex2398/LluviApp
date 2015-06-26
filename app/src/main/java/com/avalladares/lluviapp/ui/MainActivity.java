@@ -62,11 +62,13 @@ public class MainActivity extends Activity implements
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener {
 
+    public final static String DAILY_FORECAST = "DAILY_FORECAST";
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 1500;
     private final static String REQUEST_WEATHER = "weather";
     private final static String REQUEST_CITY = "city";
     private final static String REQUEST_BACKGROUND="background";
     public static final String TAG = MainActivity.class.getSimpleName();
+    public static int background;
 
     // Boolean for selecting background images from flickr weather project pool
     public boolean getPicturesFlickr  = false;
@@ -118,6 +120,7 @@ public class MainActivity extends Activity implements
     LinearLayout mLinearLayout;
     @InjectView(R.id.degreeImageView)
     ImageView mDegreeImageView;
+
 
 
 
@@ -469,17 +472,17 @@ public class MainActivity extends Activity implements
 
 
     private void getLongLat(Location location) {
-    // Method for setting long and lat using location object
+        // Method for setting long and lat using location object
         currentLongitude = location.getLongitude();
         currentLatitude = location.getLatitude();
     }
 
     private void getlonglat_deprecated() {
-    // Method for getting longitude and latitude
-    // Parameters:
-    // Longitude (double)
-    // Latitude (double)
-    // Deprecated: obtained with google services
+        // Method for getting longitude and latitude
+        // Parameters:
+        // Longitude (double)
+        // Latitude (double)
+        // Deprecated: obtained with google services
         LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         Location location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         double longitude = location.getLongitude();
@@ -538,7 +541,8 @@ public class MainActivity extends Activity implements
             if (changeBgJustOnce) {
                 if (changeBg_count < 1) {
                     changeBg_count++;
-                    Drawable draw = getResources().getDrawable(current.getBgId());
+                    background = current.getBgId();
+                    Drawable draw = getResources().getDrawable(background);
                     mBackgroundLayout.setBackground(draw);
                     applyAnimation(Techniques.FadeIn, 500, R.id.backgroundLayout);
 
@@ -557,7 +561,7 @@ public class MainActivity extends Activity implements
         mCityLabel.setText(mCurrentLocation.getCity() + "");
         applyAnimation(Techniques.FadeIn, 400, R.id.cityLabel);
 
-        }
+    }
 
     private void updateBackgroundUIFlickr() {
 
@@ -684,6 +688,8 @@ public class MainActivity extends Activity implements
     @OnClick(R.id.dailyButton)
     public void startDailyActivity(View view) {
         Intent intent = new Intent(this, DailyForecastActivity.class);
+        intent.putExtra("background",background);
+        intent.putExtra(DAILY_FORECAST,mForecast.getDailyForecast());
 
         startActivity(intent);
 
