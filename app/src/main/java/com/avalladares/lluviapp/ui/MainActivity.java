@@ -69,6 +69,7 @@ public class MainActivity extends Activity implements
     private final static String REQUEST_BACKGROUND="background";
     public static final String TAG = MainActivity.class.getSimpleName();
     public static int background;
+    public static String city;
 
     // Boolean for selecting background images from flickr weather project pool
     public boolean getPicturesFlickr  = false;
@@ -559,6 +560,7 @@ public class MainActivity extends Activity implements
         mLocationLabel.setText(mCurrentLocation.getStreet() + "");
         applyAnimation(Techniques.FadeIn, 400, R.id.locationLabel);
         mCityLabel.setText(mCurrentLocation.getCity() + "");
+        city=mCurrentLocation.getCity() + "";
         applyAnimation(Techniques.FadeIn, 400, R.id.cityLabel);
 
     }
@@ -689,6 +691,7 @@ public class MainActivity extends Activity implements
     public void startDailyActivity(View view) {
         Intent intent = new Intent(this, DailyForecastActivity.class);
         intent.putExtra("background",background);
+        intent.putExtra("city",city);
         intent.putExtra(DAILY_FORECAST,mForecast.getDailyForecast());
 
         startActivity(intent);

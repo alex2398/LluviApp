@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.widget.ArrayAdapter;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.avalladares.lluviapp.R;
 import com.avalladares.lluviapp.adapters.DayAdapter;
@@ -25,11 +26,15 @@ public class DailyForecastActivity extends ListActivity {
 
         Intent intent = getIntent();
         RelativeLayout mBackground = (RelativeLayout) findViewById(R.id.backgroundList);
-
+        TextView mCity = (TextView) findViewById(R.id.locationTextView);
 
         int bg = intent.getIntExtra("background", 0);
         Drawable draw = getResources().getDrawable(bg);
         mBackground.setBackground(draw);
+
+        String city = intent.getStringExtra("city");
+        mCity.setText(city);
+
 
 
 
