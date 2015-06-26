@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -35,9 +36,12 @@ import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Random;
 
 import butterknife.ButterKnife;
@@ -55,8 +59,15 @@ public class MainActivity extends Activity implements
     private final static String REQUEST_BACKGROUND="background";
     public static final String TAG = MainActivity.class.getSimpleName();
 
+    // Boolean for selecting background images from flickr weather project pool
+    public boolean getPicturesFlickr  = false;
+    // Booleans for changing background just on startup
+    public boolean changeBgJustOnce = true;
+    public int changeBg_count=0;
+
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
+    private String cityTag = null;
 
     private double currentLongitude;
     private double currentLatitude;
@@ -65,8 +76,8 @@ public class MainActivity extends Activity implements
     private CurrentLocation mCurrentLocation;
     private FlickrImages mFlickrImages;
 
-    public String weatherTag=null;
-    public String cityTag=null;
+    private String lang = Locale.getDefault().getLanguage();
+
     String pictureSizeUrl = "url_l";
 
     private Location location;
@@ -95,7 +106,10 @@ public class MainActivity extends Activity implements
     RelativeLayout mBackgroundLayout;
     @InjectView(R.id.cityLabel)
     TextView mCityLabel;
-
+    @InjectView(R.id.linearLayout)
+    LinearLayout mLinearLayout;
+    @InjectView(R.id.degreeImageView)
+    ImageView mDegreeImageView;
 
 
     @Override
@@ -128,8 +142,6 @@ public class MainActivity extends Activity implements
             public void onClick(View v) {
                 applyAnimation(Techniques.BounceIn, 200, R.id.refreshImageView);
                 getDataAllData();
-
-
             }
         });
 
@@ -140,13 +152,15 @@ public class MainActivity extends Activity implements
 
         getForecast();
         getLocation(currentLatitude, currentLongitude);
-
+        if (getPicturesFlickr == true) {
+            getBackgroundFlickr();
+        }
     }
 
     // Method for getting location using google maps
     private void getLocation(double lat, double lon) {
         //String apiKey = "27974c4bc33201748eaf542a6769c3b7";
-        String locationUrl = "http://maps.googleapis.com/maps/api/geocode/json?latlng=" + lat + "," + lon + "&sensor=false";
+        String locationUrl = "http://maps.googleapis.com/maps/api/geocode/json?latlng=" + lat + "," + lon + "&sensor=false&language=" + lang;
         getJSONData(locationUrl, "location");
     }
 
@@ -154,23 +168,18 @@ public class MainActivity extends Activity implements
     private void getForecast() {
         String apiKey = "27974c4bc33201748eaf542a6769c3b7";
         String forecastUrl = "https://api.forecast.io/forecast/" + apiKey +
-                "/" + currentLatitude + "," + currentLongitude + "?units=auto&lang=es";
+                "/" + currentLatitude + "," + currentLongitude + "?units=auto&lang=" + lang;
         getJSONData(forecastUrl, "weather");
     }
-/*
-    private void getBackgroundFlickr() {
-        String apiKey = "b800034851ef22708d4bf96f2df557f2";
-        Log.d(TAG, "ALEX");
 
+    private void getBackgroundFlickr() {
+
+        String apiKey = "b800034851ef22708d4bf96f2df557f2";
         String flickrUrl="https://api.flickr.com/services/rest/?&method=flickr.groups.pools.getPhotos&api_key=" + apiKey +
                 "&group_id=1463451@N25&tags=" + cityTag + "&extras=" + pictureSizeUrl +"&format=json&nojsoncallback=1";
 
-
         getJSONData(flickrUrl,"background");
-
     }
-*/
-
 
     // Method for getting JSON data
     // Parameters:
@@ -180,7 +189,6 @@ public class MainActivity extends Activity implements
     //          "city" for location
 
     private void getJSONData(String Url, final String method) {
-
 
         // Check network availability
         if (isNetworkAvailable()) {
@@ -202,9 +210,7 @@ public class MainActivity extends Activity implements
 
             Call call = client.newCall(request);
 
-
             // We make the request in another thread using enqueue() method
-
             call.enqueue(new Callback() {
                 @Override
                 public void onFailure(Request request, IOException e) {
@@ -232,21 +238,18 @@ public class MainActivity extends Activity implements
                         if (response.isSuccessful()) {
                             if (method.equals("weather")) {
                                 mCurrentWeather = getCurrentWeather(jsondata);
-
-
-
                             }
                             if (method.equals("location")) {
                                 mCurrentLocation = getCurrentLocation(jsondata);
-
                             }
-
                             if (method.equals("background")) {
-
-                                mFlickrImages = getFlickrImages(jsondata);
+                                if (changeBgJustOnce == true) {
+                                    if (changeBg_count < 1) {
+                                        mFlickrImages = getFlickrImages(jsondata);
+                                    }
+                                }
                             }
-
-
+                            // For updating UI we get back to the main thread
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -257,9 +260,14 @@ public class MainActivity extends Activity implements
                                     if (method.equals("location")) {
                                         updateLocationUI();
                                     }
-
                                     if (method.equals("background")) {
-                                        updateBackgroundUIFlickr();
+                                        if (changeBgJustOnce == true) {
+                                            if (changeBg_count < 1) {
+                                                updateBackgroundUIFlickr();
+                                                //setViewsVisible();
+                                                changeBg_count++;
+                                            }
+                                        }
                                     }
                                 }
                             });
@@ -304,7 +312,6 @@ public class MainActivity extends Activity implements
         }
     }
 
-
     // Method for setting long and lat using location object
     private void getLongLat(Location location) {
 
@@ -346,47 +353,54 @@ public class MainActivity extends Activity implements
 
         mTemperatureValue.setText(mCurrentWeather.getTemperature() + "");
         applyAnimation(Techniques.ZoomIn, 500, R.id.temperatureLabel);
-
         mLastUpdateLabel.setText(getString(R.string.last_update) + " " + mCurrentWeather.getFormattedTime());
         mHumidityValue.setText(mCurrentWeather.getHumidity() + "%");
         mPrecipValue.setText(mCurrentWeather.getPrecipChance() + "%");
         mSummaryLabel.setText(mCurrentWeather.getSummary() + "");
-
         Drawable drawable = getResources().getDrawable(mCurrentWeather.getIconId());
         mIconImageView.setImageDrawable(drawable);
         applyAnimation(Techniques.FadeIn, 1500, R.id.iconImageView);
 
-        Drawable draw = getResources().getDrawable(mCurrentWeather.getBgId());
-        mBackgroundLayout.setBackground(draw);
-        applyAnimation(Techniques.FadeIn, 500, R.id.backgroundLayout);
+        // Optional: Change background only when opening app
 
+        if (!getPicturesFlickr) {
+            if (changeBgJustOnce) {
+                if (changeBg_count < 1) {
+                    changeBg_count++;
+                    Drawable draw = getResources().getDrawable(mCurrentWeather.getBgId());
+                    mBackgroundLayout.setBackground(draw);
+                    applyAnimation(Techniques.FadeIn, 500, R.id.backgroundLayout);
+
+                }
+            }
+        }
+        //We set views visible (splashscreen effect)
+        setViewsVisible();
     }
 
     // Method for updating display location data
     private void updateLocationUI() {
+
         mLocationLabel.setText(mCurrentLocation.getStreet() + "");
         applyAnimation(Techniques.FadeIn, 400, R.id.locationLabel);
-
         mCityLabel.setText(mCurrentLocation.getCity() + "");
         applyAnimation(Techniques.FadeIn, 400, R.id.cityLabel);
 
         }
 
     private void updateBackgroundUIFlickr() {
+
         AQuery aq = new AQuery(this);
 
         String url = mFlickrImages.getUrlImage();
         boolean memCache = false;
         boolean fileCache = false;
 
-        //aq.id(mBackgroundLayout).image(url);
-
         aq.ajax(url.trim(), Bitmap.class, 0, new AjaxCallback<Bitmap>() {
             @Override
             public void callback(String url, Bitmap object, AjaxStatus status) {
                 super.callback(url, object, status);
                 mBackgroundLayout.setBackground(new BitmapDrawable(object));
-
             }
         });
 
@@ -414,11 +428,10 @@ public class MainActivity extends Activity implements
         String address = location.getJSONArray("results").getJSONObject(0).getJSONArray("address_components").getJSONObject(0).getString("short_name");
         String street = location.getJSONArray("results").getJSONObject(0).getJSONArray("address_components").getJSONObject(1).getString("short_name");
         String city = location.getJSONArray("results").getJSONObject(0).getJSONArray("address_components").getJSONObject(2).getString("short_name");
-        cityTag=city;
         String country = location.getJSONArray("results").getJSONObject(0).getJSONArray("address_components").getJSONObject(4).getString("long_name");
 
         CurrentLocation currentLocation = new CurrentLocation();
-
+        cityTag=city;
         currentLocation.setCity(city);
         currentLocation.setAddress(address);
         currentLocation.setCountry(country);
@@ -452,9 +465,6 @@ public class MainActivity extends Activity implements
         currentWeather.setTemperature(temperature);
         currentWeather.setTimeZone(timezone);
 
-
-        weatherTag = summary;
-
         return currentWeather;
     }
 
@@ -465,12 +475,8 @@ public class MainActivity extends Activity implements
         JSONObject bg = new JSONObject(jsondata);
         int totalPictures = Integer.parseInt(bg.getJSONObject("photos").getString("total"));
         int valor = randomgenerator.nextInt(totalPictures);
-
         String photo = bg.getJSONObject("photos").getJSONArray("photo").getJSONObject(valor).getString(pictureSizeUrl);
-
-
         FlickrImages flickrImages = new FlickrImages();
-
         flickrImages.setUrlImage(photo);
 
         return  flickrImages;
@@ -506,21 +512,22 @@ public class MainActivity extends Activity implements
 
     @Override
     public void onConnected(Bundle bundle) {
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (location == null) {
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         } else {
             getLongLat(location);
             getDataAllData();
-
         }
-
     }
 
     @Override
-    public void onConnectionSuspended(int i) {
-
-    }
+    public void onConnectionSuspended(int i) {}
 
     @Override
     public void onLocationChanged(Location location) {
@@ -556,8 +563,17 @@ public class MainActivity extends Activity implements
             Log.i(TAG, "Location services connection failed with code " + connectionResult.getErrorCode());
         }
     }
+    public void setViewsVisible(){
 
-
-
-
+        mLinearLayout.setVisibility(View.VISIBLE);
+        mIconImageView.setVisibility(View.VISIBLE);
+        mRefreshImageView.setVisibility(View.VISIBLE);
+        mLocationLabel.setVisibility(View.VISIBLE);
+        mLocationLabel.setVisibility(View.VISIBLE);
+        mCityLabel.setVisibility(View.VISIBLE);
+        mLastUpdateLabel.setVisibility(View.VISIBLE);
+        mTemperatureValue.setVisibility(View.VISIBLE);
+        mSummaryLabel.setVisibility(View.VISIBLE);
+        mDegreeImageView.setVisibility(View.VISIBLE);
+    }
 }
