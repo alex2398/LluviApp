@@ -1,10 +1,12 @@
-package com.avalladares.lluviapp;
+package com.avalladares.lluviapp.ui;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.os.Bundle;
+
+import com.avalladares.lluviapp.R;
 
 /**
  * Created by avalladares on 19/06/2015.

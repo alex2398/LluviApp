@@ -1,4 +1,4 @@
-package com.avalladares.lluviapp;
+package com.avalladares.lluviapp.location;
 
 /**
  * Created by avalladares on 23/06/2015.

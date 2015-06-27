@@ -1,6 +1,6 @@
-package com.avalladares.lluviapp;
+package com.avalladares.lluviapp.weather;
 
-import android.util.Log;
+import com.avalladares.lluviapp.R;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -10,7 +10,7 @@ import java.util.TimeZone;
 /**
  * Created by Alex on 19/06/2015.
  */
-public class CurrentWeather {
+public class Current {
     private String mIcon;
     private long mTime;
     private double mHumidity;

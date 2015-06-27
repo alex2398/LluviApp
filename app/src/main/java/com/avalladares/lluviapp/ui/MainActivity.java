@@ -1,8 +1,9 @@
-package com.avalladares.lluviapp;
+package com.avalladares.lluviapp.ui;
 
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentSender;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -24,6 +25,12 @@ import android.widget.Toast;
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
+import com.avalladares.lluviapp.R;
+import com.avalladares.lluviapp.location.CurrentLocation;
+import com.avalladares.lluviapp.weather.Current;
+import com.avalladares.lluviapp.weather.Day;
+import com.avalladares.lluviapp.weather.Forecast;
+import com.avalladares.lluviapp.weather.Hour;
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
 import com.google.android.gms.common.ConnectionResult;
@@ -37,6 +44,7 @@ import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -46,6 +54,7 @@ import java.util.Random;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import butterknife.OnClick;
 
 
 public class MainActivity extends Activity implements
@@ -53,7 +62,7 @@ public class MainActivity extends Activity implements
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener {
 
-    private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 1500;
+    private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 1500;
     private final static String REQUEST_WEATHER = "weather";
     private final static String REQUEST_CITY = "city";
     private final static String REQUEST_BACKGROUND="background";
@@ -72,8 +81,9 @@ public class MainActivity extends Activity implements
     private double currentLongitude;
     private double currentLatitude;
 
-    private CurrentWeather mCurrentWeather;
+
     private CurrentLocation mCurrentLocation;
+    private Forecast mForecast;
     private FlickrImages mFlickrImages;
 
     private String lang = Locale.getDefault().getLanguage();
@@ -100,8 +110,6 @@ public class MainActivity extends Activity implements
     ProgressBar mProgressBar;
     @InjectView(R.id.locationLabel)
     TextView mLocationLabel;
-    @InjectView(R.id.lastUpdateLabel)
-    TextView mLastUpdateLabel;
     @InjectView(R.id.backgroundLayout)
     RelativeLayout mBackgroundLayout;
     @InjectView(R.id.cityLabel)
@@ -110,6 +118,7 @@ public class MainActivity extends Activity implements
     LinearLayout mLinearLayout;
     @InjectView(R.id.degreeImageView)
     ImageView mDegreeImageView;
+
 
 
     @Override
@@ -182,14 +191,18 @@ public class MainActivity extends Activity implements
         getJSONData(flickrUrl,"background");
     }
 
-    // Method for getting JSON data
-    // Parameters:
-    // Url (String) : url for retrieving JSON data
-    // dataType (String) :
-    //          "weather" for forecast
-    //          "city" for location
+
 
     private void getJSONData(String Url, final String method) {
+
+        /*
+        Method for getting JSON data
+        Parameters:
+        Url (String) : url for retrieving JSON data
+        dataType (String) :
+        "weather" for forecast
+        "city" for location
+        */
 
         // Check network availability
         if (isNetworkAvailable()) {
@@ -238,7 +251,7 @@ public class MainActivity extends Activity implements
                         // Response OK
                         if (response.isSuccessful()) {
                             if (method.equals("weather")) {
-                                mCurrentWeather = getCurrentWeather(jsondata);
+                                mForecast = parseForeCastDetails(jsondata);
                             }
                             if (method.equals("location")) {
                                 mCurrentLocation = getCurrentLocation(jsondata);
@@ -296,6 +309,184 @@ public class MainActivity extends Activity implements
         }
     }
 
+    private CurrentLocation getCurrentLocation(String jsondata) throws JSONException {
+        // Method getCurrentLocation: Obtains location data using JSON returned string
+        // Returns CurrentLocation object
+        JSONObject location = new JSONObject(jsondata);
+        String address = location.getJSONArray("results").getJSONObject(0).getJSONArray("address_components").getJSONObject(0).getString("short_name");
+        String street = location.getJSONArray("results").getJSONObject(0).getJSONArray("address_components").getJSONObject(1).getString("short_name");
+        String city = location.getJSONArray("results").getJSONObject(0).getJSONArray("address_components").getJSONObject(2).getString("short_name");
+        String country = location.getJSONArray("results").getJSONObject(0).getJSONArray("address_components").getJSONObject(4).getString("long_name");
+
+        CurrentLocation currentLocation = new CurrentLocation();
+        cityTag=city;
+        currentLocation.setCity(city);
+        currentLocation.setAddress(address);
+        currentLocation.setCountry(country);
+        currentLocation.setStreet(street);
+
+        return currentLocation;
+    }
+
+    private Forecast parseForeCastDetails(String jsondata) throws JSONException {
+
+        Forecast forecast = new Forecast();
+
+        forecast.setCurrent(getCurrentDetails(jsondata));
+        forecast.setDailyForecast(getDailyForecast(jsondata));
+        forecast.setHourlyForecast(getHourlyForecast(jsondata));
+
+
+
+
+        return forecast;
+
+    }
+
+    private Current getCurrentDetails(String jsondata) throws JSONException {
+
+        /*
+        Method getCurrentDetails: Obtains forecast data using JSON returned string
+        Returns CurrenWeather object
+        */
+
+        JSONObject forecast = new JSONObject(jsondata);
+
+        String timezone = forecast.getString("timezone");
+
+        JSONObject currently = forecast.getJSONObject("currently");
+
+        Current current = new Current();
+
+        current.setIcon(currently.getString("icon"));
+        current.setHumidity(currently.getDouble("humidity"));
+        current.setTime(currently.getLong("time"));
+        current.setPrecipChance(currently.getDouble("precipProbability"));
+        current.setSummary(currently.getString("summary"));
+        current.setTemperature(Math.round(currently.getDouble("temperature")));
+        current.setTimeZone(timezone);
+
+        return current;
+    }
+
+    private Day[] getDailyForecast(String jsondata) throws JSONException{
+        // We create forecast JSON object and populate it with String jsondata
+
+        JSONObject forecast = new JSONObject(jsondata);
+        // We get timezone from the forecast root
+        String timezone = forecast.getString("timezone");
+
+        // We get hourly data from forecast root
+        JSONObject daily = forecast.getJSONObject("daily");
+        // Hourly data comes in an Array, so we put it into an JSONArray called hourly
+        JSONArray data = daily.getJSONArray("data");
+
+        // We create a java Hour Array with the same lenght as the JSONArray data
+        Day[] days = new Day[data.length()];
+
+        // We loop through JSONArray data and go populating each JSON object
+        for (int i=0; i<data.length(); i++) {
+            JSONObject jsonDay = data.getJSONObject(i);
+
+            /*
+            We create the hour object inside the loop for using a new
+            object each time. Otherwise, it the object is created outside the loop
+            we end up populating the same object and filling the array with the same data
+            */
+
+            Day day = new Day();
+
+            day.setSummary(jsonDay.getString("summary"));
+            day.setTemperatureMax(jsonDay.getDouble("temperatureMax"));
+            day.setIcon(jsonDay.getString("icon"));
+            day.setTime(jsonDay.getLong("time"));
+            day.setTimezone(timezone);
+
+            // Once we have the object populated we save it into its position in the Array hours
+            days[i] = day;
+        }
+
+        // We return hours array
+        return days;
+
+    }
+
+    private Hour[] getHourlyForecast(String jsondata) throws JSONException {
+
+        // We create forecast JSON object and populate it with String jsondata
+        JSONObject forecast = new JSONObject(jsondata);
+        // We get timezone from the forecast root
+        String timezone = forecast.getString("timezone");
+
+        // We get hourly data from forecast root
+        JSONObject hourly = forecast.getJSONObject("hourly");
+        // Hourly data comes in an Array, so we put it into an JSONArray called hourly
+        JSONArray data = hourly.getJSONArray("data");
+
+        // We create a java Hour Array with the same lenght as the JSONArray data
+        Hour[] hours = new Hour[data.length()];
+
+        // We loop through JSONArray data and go populating each JSON object
+        for (int i=0; i<data.length(); i++) {
+            JSONObject jsonHour = data.getJSONObject(i);
+
+            /*
+            We create the hour object inside the loop for using a new
+            object each time. Otherwise, it the object is created outside the loop
+            we end up populating the same object and filling the array with the same data
+            */
+
+            Hour hour = new Hour();
+
+            hour.setSummary(jsonHour.getString("summary"));
+            hour.setTemperature(jsonHour.getDouble("temperature"));
+            hour.setIcon(jsonHour.getString("icon"));
+            hour.setTime(jsonHour.getLong("time"));
+            hour.setTimezone(timezone);
+
+            // Once we have the object populated we save it into its position in the Array hours
+            hours[i] = hour;
+        }
+
+        // We return hours array
+        return hours;
+    }
+
+    private FlickrImages getFlickrImages(String jsondata) throws JSONException{
+
+        Random randomgenerator = new Random();
+
+        JSONObject bg = new JSONObject(jsondata);
+        int totalPictures = Integer.parseInt(bg.getJSONObject("photos").getString("total"));
+        int valor = randomgenerator.nextInt(totalPictures);
+        String photo = bg.getJSONObject("photos").getJSONArray("photo").getJSONObject(valor).getString(pictureSizeUrl);
+        FlickrImages flickrImages = new FlickrImages();
+        flickrImages.setUrlImage(photo);
+
+        return  flickrImages;
+    }
+
+
+
+    private void getLongLat(Location location) {
+    // Method for setting long and lat using location object
+        currentLongitude = location.getLongitude();
+        currentLatitude = location.getLatitude();
+    }
+
+    private void getlonglat_deprecated() {
+    // Method for getting longitude and latitude
+    // Parameters:
+    // Longitude (double)
+    // Latitude (double)
+    // Deprecated: obtained with google services
+        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        Location location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        double longitude = location.getLongitude();
+        double latitude = location.getLatitude();
+    }
+
+
     // Methods for Google API Client
     @Override
     protected void onResume() {
@@ -312,28 +503,6 @@ public class MainActivity extends Activity implements
             mGoogleApiClient.disconnect();
         }
     }
-
-    // Method for setting long and lat using location object
-    private void getLongLat(Location location) {
-
-        currentLongitude = location.getLongitude();
-        currentLatitude = location.getLatitude();
-    }
-
-    // Method for getting longitude and latitude
-    // Parameters:
-    // Longitude (double)
-    // Latitude (double)
-    // Deprecated: obtained with google services
-
-    private void getlonglat_deprecated() {
-
-        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        Location location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-        double longitude = location.getLongitude();
-        double latitude = location.getLatitude();
-    }
-
 
     // Method for toggling progress bar visibility
     private void toggleRefresh() {
@@ -352,13 +521,14 @@ public class MainActivity extends Activity implements
     // Animations added
     private void updateWeatherUI() {
 
-        mTemperatureValue.setText(mCurrentWeather.getTemperature() + "");
+        Current current = mForecast.getCurrent();
+
+        mTemperatureValue.setText(current.getTemperature() + "");
         applyAnimation(Techniques.ZoomIn, 500, R.id.temperatureLabel);
-        mLastUpdateLabel.setText(getString(R.string.last_update) + " " + mCurrentWeather.getFormattedTime());
-        mHumidityValue.setText(mCurrentWeather.getHumidity() + "%");
-        mPrecipValue.setText(mCurrentWeather.getPrecipChance() + "%");
-        mSummaryLabel.setText(mCurrentWeather.getSummary() + "");
-        Drawable drawable = getResources().getDrawable(mCurrentWeather.getIconId());
+        mHumidityValue.setText(current.getHumidity() + "%");
+        mPrecipValue.setText(current.getPrecipChance() + "%");
+        mSummaryLabel.setText(current.getSummary() + "");
+        Drawable drawable = getResources().getDrawable(current.getIconId());
         mIconImageView.setImageDrawable(drawable);
         applyAnimation(Techniques.FadeIn, 1500, R.id.iconImageView);
 
@@ -368,15 +538,15 @@ public class MainActivity extends Activity implements
             if (changeBgJustOnce) {
                 if (changeBg_count < 1) {
                     changeBg_count++;
-                    Drawable draw = getResources().getDrawable(mCurrentWeather.getBgId());
+                    Drawable draw = getResources().getDrawable(current.getBgId());
                     mBackgroundLayout.setBackground(draw);
                     applyAnimation(Techniques.FadeIn, 500, R.id.backgroundLayout);
 
                 }
             }
         }
-        //We set views visible (splashscreen effect)
-        setViewsVisible();
+
+
     }
 
     // Method for updating display location data
@@ -409,84 +579,39 @@ public class MainActivity extends Activity implements
 
     }
 
-    // Method for using animations in a resource
-    // Parameters:
-    // technique (Technique)
-    // duration (int) animation duration (in ms)
-    // view (int) resource id
+
     private void applyAnimation(Techniques technique, int duration, int view) {
+
+        /*
+        Method for using animations in a resource
+        Parameters:
+        technique (Technique)
+        duration (int) animation duration (in ms)
+        view (int) resource id
+        */
         YoYo.with(technique)
                 .duration(duration)
                 .playOn(findViewById(view));
 
     }
-    // Method getCurrentLocation: Obtains location data using JSON returned string
-    // Returns CurrentLocation object
 
-    private CurrentLocation getCurrentLocation(String jsondata) throws JSONException {
+    private void alertUserAboutError(String error) {
+        // Method for showing messages on display
+        // Parameters: error (String) Text to be shown in message body
+        // Changed to use Toast instead
 
-        JSONObject location = new JSONObject(jsondata);
-        String address = location.getJSONArray("results").getJSONObject(0).getJSONArray("address_components").getJSONObject(0).getString("short_name");
-        String street = location.getJSONArray("results").getJSONObject(0).getJSONArray("address_components").getJSONObject(1).getString("short_name");
-        String city = location.getJSONArray("results").getJSONObject(0).getJSONArray("address_components").getJSONObject(2).getString("short_name");
-        String country = location.getJSONArray("results").getJSONObject(0).getJSONArray("address_components").getJSONObject(4).getString("long_name");
-
-        CurrentLocation currentLocation = new CurrentLocation();
-        cityTag=city;
-        currentLocation.setCity(city);
-        currentLocation.setAddress(address);
-        currentLocation.setCountry(country);
-        currentLocation.setStreet(street);
-
-        return currentLocation;
+        /*AlertDialogFragment dialog = new AlertDialogFragment();
+        dialog.setText(error);
+        dialog.show(getFragmentManager(), "error_dialog");
+*/
+        Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
     }
 
-    // Method getCurrentWeather: Obtains forecast data using JSON returned string
-    // Returns CurrenWeather object
-
-    private CurrentWeather getCurrentWeather(String jsondata) throws JSONException {
-
-        JSONObject forecast = new JSONObject(jsondata);
-        String timezone = forecast.getString("timezone");
-        JSONObject currently = forecast.getJSONObject("currently");
-        String icon = currently.getString("icon");
-        long time = currently.getLong("time");
-        double humidity = currently.getDouble("humidity");
-        double precipChance = currently.getDouble("precipProbability");
-        String summary = currently.getString("summary");
-        double temperature = Math.round(currently.getDouble("temperature"));
-
-        CurrentWeather currentWeather = new CurrentWeather();
-
-        currentWeather.setIcon(icon);
-        currentWeather.setHumidity(humidity);
-        currentWeather.setTime(time);
-        currentWeather.setPrecipChance(precipChance);
-        currentWeather.setSummary(summary);
-        currentWeather.setTemperature(temperature);
-        currentWeather.setTimeZone(timezone);
-
-        return currentWeather;
-    }
-
-    private FlickrImages getFlickrImages(String jsondata) throws JSONException{
-
-        Random randomgenerator = new Random();
-
-        JSONObject bg = new JSONObject(jsondata);
-        int totalPictures = Integer.parseInt(bg.getJSONObject("photos").getString("total"));
-        int valor = randomgenerator.nextInt(totalPictures);
-        String photo = bg.getJSONObject("photos").getJSONArray("photo").getJSONObject(valor).getString(pictureSizeUrl);
-        FlickrImages flickrImages = new FlickrImages();
-        flickrImages.setUrlImage(photo);
-
-        return  flickrImages;
-    }
-
-    // Method for check network availability
-    // Returns boolean true(available) or false (unavailable)
+    // Methods for connection
 
     private boolean isNetworkAvailable() {
+        // Method for check network availability
+        // Returns boolean true(available) or false (unavailable)
         ConnectivityManager manager = (ConnectivityManager)
                 getSystemService(Context.CONNECTIVITY_SERVICE);
 
@@ -498,17 +623,6 @@ public class MainActivity extends Activity implements
         }
 
         return isAvailable;
-    }
-
-    // Method for showing messages on display
-    // Parameters: error (String) Text to be shown in message body
-    // Changed to use Toast instead
-    private void alertUserAboutError(String error) {
-        /* AlertDialogFragment dialog = new AlertDialogFragment();
-        dialog.setText(error);
-        dialog.show(getFragmentManager(), "error_dialog");
-        */
-        Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -529,6 +643,7 @@ public class MainActivity extends Activity implements
         }
     }
 
+
     @Override
     public void onConnectionSuspended(int i) {}
 
@@ -536,7 +651,6 @@ public class MainActivity extends Activity implements
     public void onLocationChanged(Location location) {
         getLongLat(location);
     }
-
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
          /*
@@ -548,14 +662,14 @@ public class MainActivity extends Activity implements
         if (connectionResult.hasResolution()) {
             try {
                 // Start an Activity that tries to resolve the error
-                connectionResult.startResolutionForResult(this, CONNECTION_FAILURE_RESOLUTION_REQUEST);
+                connectionResult.startResolutionForResult(this, PLAY_SERVICES_RESOLUTION_REQUEST);
                      /*
                       * Thrown if Google Play services canceled the original
                       * PendingIntent
                       */
             } catch (IntentSender.SendIntentException e) {
                 // Log the error
-                e.printStackTrace();
+                Log.d(TAG,"Error Google Services");
 
             }
         } else {
@@ -566,17 +680,13 @@ public class MainActivity extends Activity implements
             Log.i(TAG, "Location services connection failed with code " + connectionResult.getErrorCode());
         }
     }
-    public void setViewsVisible(){
 
-        mLinearLayout.setVisibility(View.VISIBLE);
-        mIconImageView.setVisibility(View.VISIBLE);
-        mRefreshImageView.setVisibility(View.VISIBLE);
-        mLocationLabel.setVisibility(View.VISIBLE);
-        mLocationLabel.setVisibility(View.VISIBLE);
-        mCityLabel.setVisibility(View.VISIBLE);
-        mLastUpdateLabel.setVisibility(View.VISIBLE);
-        mTemperatureValue.setVisibility(View.VISIBLE);
-        mSummaryLabel.setVisibility(View.VISIBLE);
-        mDegreeImageView.setVisibility(View.VISIBLE);
+    @OnClick(R.id.dailyButton)
+    public void startDailyActivity(View view) {
+        Intent intent = new Intent(this, DailyForecastActivity.class);
+
+        startActivity(intent);
+
     }
+
 }
