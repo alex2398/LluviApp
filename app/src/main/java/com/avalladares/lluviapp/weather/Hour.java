@@ -69,6 +69,7 @@ public class Hour implements Parcelable{
         Date date = new Date ((long) (mTime * 1000));
         return formatter.format(date);
 
+
     }
 
     @Override
