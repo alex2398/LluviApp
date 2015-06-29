@@ -68,8 +68,10 @@ public class MainActivity extends Activity implements
     private final static String REQUEST_CITY = "city";
     private final static String REQUEST_BACKGROUND="background";
     public static final String TAG = MainActivity.class.getSimpleName();
-    public static int background;
-    public static String city;
+
+    private String city;
+    private int bg;
+
 
     // Boolean for selecting background images from flickr weather project pool
     public boolean getPicturesFlickr  = false;
@@ -79,19 +81,16 @@ public class MainActivity extends Activity implements
 
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
-    private String cityTag = null;
 
     private double currentLongitude;
     private double currentLatitude;
 
-
     private CurrentLocation mCurrentLocation;
     private Forecast mForecast;
     private FlickrImages mFlickrImages;
+    String pictureSizeUrl = "url_l";
 
     private String lang = Locale.getDefault().getLanguage();
-
-    String pictureSizeUrl = "url_l";
 
     private Location location;
 
@@ -169,6 +168,7 @@ public class MainActivity extends Activity implements
         if (getPicturesFlickr == true) {
             getBackgroundFlickr();
         }
+
     }
 
     // Method for getting location using google maps
@@ -190,12 +190,10 @@ public class MainActivity extends Activity implements
 
         String apiKey = "b800034851ef22708d4bf96f2df557f2";
         String flickrUrl="https://api.flickr.com/services/rest/?&method=flickr.groups.pools.getPhotos&api_key=" + apiKey +
-                "&group_id=1463451@N25&tags=" + cityTag + "&extras=" + pictureSizeUrl +"&format=json&nojsoncallback=1";
+                "&group_id=1463451@N25&tags=" + mCurrentLocation.getCity() + "&extras=" + pictureSizeUrl +"&format=json&nojsoncallback=1";
 
         getJSONData(flickrUrl,"background");
     }
-
-
 
     private void getJSONData(String Url, final String method) {
 
@@ -323,7 +321,7 @@ public class MainActivity extends Activity implements
         String country = location.getJSONArray("results").getJSONObject(0).getJSONArray("address_components").getJSONObject(4).getString("long_name");
 
         CurrentLocation currentLocation = new CurrentLocation();
-        cityTag=city;
+        //cityTag=city;
         currentLocation.setCity(city);
         currentLocation.setAddress(address);
         currentLocation.setCountry(country);
@@ -339,9 +337,6 @@ public class MainActivity extends Activity implements
         forecast.setCurrent(getCurrentDetails(jsondata));
         forecast.setDailyForecast(getDailyForecast(jsondata));
         forecast.setHourlyForecast(getHourlyForecast(jsondata));
-
-
-
 
         return forecast;
 
@@ -542,8 +537,8 @@ public class MainActivity extends Activity implements
             if (changeBgJustOnce) {
                 if (changeBg_count < 1) {
                     changeBg_count++;
-                    background = current.getBgId();
-                    Drawable draw = getResources().getDrawable(background);
+                    bg = current.getBgId();
+                    Drawable draw = getResources().getDrawable(bg);
                     mBackgroundLayout.setBackground(draw);
                     applyAnimation(Techniques.FadeIn, 500, R.id.backgroundLayout);
 
@@ -559,8 +554,8 @@ public class MainActivity extends Activity implements
 
         mLocationLabel.setText(mCurrentLocation.getStreet() + "");
         applyAnimation(Techniques.FadeIn, 400, R.id.locationLabel);
-        mCityLabel.setText(mCurrentLocation.getCity() + "");
-        city=mCurrentLocation.getCity() + "";
+        city = mCurrentLocation.getCity();
+        mCityLabel.setText(city);
         applyAnimation(Techniques.FadeIn, 400, R.id.cityLabel);
 
     }
@@ -690,11 +685,19 @@ public class MainActivity extends Activity implements
     @OnClick(R.id.dailyButton)
     public void startDailyActivity(View view) {
         Intent intent = new Intent(this, DailyForecastActivity.class);
-        intent.putExtra("background",background);
-        intent.putExtra("city",city);
-        intent.putExtra(DAILY_FORECAST,mForecast.getDailyForecast());
 
-        startActivity(intent);
+
+        if (mForecast!=null) {
+            // Le pasamos los extras al intent
+            intent.putExtra("background",bg);
+            intent.putExtra("city",city);
+            // Le pasamos el array de días con el método getDailyForecast()
+            intent.putExtra(DAILY_FORECAST, mForecast.getDailyForecast());
+            // Llamamos a la siguiente actividad
+            startActivity(intent);
+        } else {
+            Toast.makeText(this,"Information being acquired, please retry later",Toast.LENGTH_LONG).show();
+        }
 
     }
 

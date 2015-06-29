@@ -10,6 +10,8 @@ import java.util.TimeZone;
 /**
  * Created by avalladares on 26/06/2015.
  */
+
+//Implementamos la clase para que sea parcelable (empaquetar datos)
 public class Day implements Parcelable {
     private double mTime;
     private String mSummary;
@@ -75,10 +77,14 @@ public class Day implements Parcelable {
 
     }
 
+    // Métodos de la clase parcelable, que nos permite pasar arrays entre actividades en el intent
+
     @Override
     public int describeContents() {
         return 0;
     }
+
+    // Método para escribir los valores en el destino (empaquetar)
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
@@ -90,6 +96,7 @@ public class Day implements Parcelable {
 
     }
 
+    // Método para leer los valores (tienen que ir en el mismo orden que el anterior)(desempaquetar)
     private Day (Parcel in) {
         mTimezone = in.readString();
         mTime = in.readDouble();
@@ -99,9 +106,11 @@ public class Day implements Parcelable {
 
     }
 
+    // Implementamos un objeto Creator
     public static final Creator<Day> CREATOR = new Creator<Day>() {
         @Override
         public Day createFromParcel(Parcel source) {
+
             return new Day(source);
         }
 

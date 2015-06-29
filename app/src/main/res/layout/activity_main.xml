@@ -8,7 +8,7 @@
                 android:paddingTop="@dimen/activity_vertical_margin"
                 tools:context=".MainActivity"
                 android:id="@+id/backgroundLayout"
-                android:background="#ff2996ca">
+                android:background="@drawable/bg_gradient">
 
 
     <TextView
@@ -223,7 +223,8 @@
             android:layout_weight="1"
             android:textColor="#ffffff"
             android:background="#40ffffff"
-            android:layout_marginLeft="2dp"/>
+            android:layout_marginLeft="2dp"
+            android:enabled="false"/>
     </LinearLayout>
 
 </RelativeLayout>
