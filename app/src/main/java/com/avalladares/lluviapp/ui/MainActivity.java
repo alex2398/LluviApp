@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -122,6 +123,10 @@ public class MainActivity extends Activity implements
     LinearLayout mLinearLayout;
     @InjectView(R.id.degreeImageView)
     ImageView mDegreeImageView;
+    @InjectView(R.id.dailyButton)
+    Button mDailyButton;
+    @InjectView(R.id.hourlyButton)
+    Button mHourlyButton;
 
 
 
@@ -131,6 +136,9 @@ public class MainActivity extends Activity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.inject(this);
+
+
+
 
         // Create Google API Client
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -167,9 +175,11 @@ public class MainActivity extends Activity implements
 
         getForecast();
         getLocation(currentLatitude, currentLongitude);
+
         if (getPicturesFlickr == true) {
             getBackgroundFlickr();
         }
+
 
     }
 
@@ -282,9 +292,9 @@ public class MainActivity extends Activity implements
                                         if (changeBgJustOnce == true) {
                                             if (changeBg_count < 1) {
                                                 updateBackgroundUIFlickr();
-                                                //setViewsVisible();
                                                 changeBg_count++;
                                             }
+
                                         }
                                     }
                                 }
@@ -547,6 +557,12 @@ public class MainActivity extends Activity implements
                 }
             }
         }
+        mDailyButton.setVisibility(View.VISIBLE);
+        mDailyButton.setEnabled(true);
+        //applyAnimation(Techniques.FadeIn, 500, R.id.dailyButton);
+        mHourlyButton.setVisibility(View.VISIBLE);
+        mHourlyButton.setEnabled(true);
+        //applyAnimation(Techniques.FadeIn, 500, R.id.hourlyButton);
 
 
     }
@@ -643,6 +659,7 @@ public class MainActivity extends Activity implements
         } else {
             getLongLat(location);
             getDataAllData();
+
         }
     }
 
@@ -730,4 +747,6 @@ public class MainActivity extends Activity implements
         }
     }
 
+
 }
+

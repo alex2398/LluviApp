@@ -212,9 +212,12 @@
             android:text="@string/hourly"
             android:id="@+id/hourlyButton"
             android:layout_weight="1"
-            android:background="#40ffffff"
-            android:textColor="#ffffff"
-            android:enabled="true"/>
+            android:background="@drawable/rounded_button"
+            android:textColor="@android:color/black"
+            android:enabled="false"
+            android:visibility="invisible"
+
+            />
 
         <Button
             android:layout_width="match_parent"
@@ -222,10 +225,11 @@
             android:text="@string/seven_days"
             android:id="@+id/dailyButton"
             android:layout_weight="1"
-            android:textColor="#ffffff"
-            android:background="#40ffffff"
+            android:textColor="@android:color/black"
+            android:background="@drawable/rounded_button"
             android:layout_marginLeft="2dp"
-            android:enabled="true"/>
+            android:enabled="false"
+            android:visibility="invisible"/>
     </LinearLayout>
 
 </RelativeLayout>

@@ -67,7 +67,7 @@ public class HourAdapter extends RecyclerView.Adapter<HourAdapter.HourViewHolder
 
             mTimeLabel.setText(hour.getHour());
             mSummaryLabel.setText(hour.getSummary());
-            mTemperatureLabel.setText(hour.getTemperature() + "");
+            mTemperatureLabel.setText(hour.getTemperature() + "º");
             mIconImageView.setImageResource(hour.getIconId());
 
         }
