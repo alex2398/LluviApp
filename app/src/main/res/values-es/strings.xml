@@ -18,6 +18,6 @@
     <string name="seven_days">7 DIAS</string>
     <string name="hourly">HORAS</string>
     <string name="no_city">Refrescar los datos</string>
-    <string name="please_wait">Actualizando, por favor intentelo mas tarde</string>
+    <string name="please_wait">Actualizando,\npor favor intentelo mas tarde</string>
 
 </resources>

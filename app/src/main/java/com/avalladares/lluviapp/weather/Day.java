@@ -116,7 +116,7 @@ public class Day implements Parcelable {
 
         @Override
         public Day[] newArray(int size) {
-            return new Day[0];
+            return new Day[size];
         }
     };
 }

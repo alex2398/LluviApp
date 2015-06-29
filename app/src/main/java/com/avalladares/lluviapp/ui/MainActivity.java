@@ -14,6 +14,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -63,6 +64,7 @@ public class MainActivity extends Activity implements
         LocationListener {
 
     public final static String DAILY_FORECAST = "DAILY_FORECAST";
+    public final static String HOURLY_FORECAST= "HOURLY_FORECAST";
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 1500;
     private final static String REQUEST_WEATHER = "weather";
     private final static String REQUEST_CITY = "city";
@@ -696,9 +698,36 @@ public class MainActivity extends Activity implements
             // Llamamos a la siguiente actividad
             startActivity(intent);
         } else {
-            Toast.makeText(this,"Information being acquired, please retry later",Toast.LENGTH_LONG).show();
+            // Centramos el toast
+            Toast toast = Toast.makeText(this, R.string.please_wait, Toast.LENGTH_LONG);
+            TextView v = (TextView) toast.getView().findViewById(android.R.id.message);
+            if( v != null) v.setGravity(Gravity.CENTER);
+            toast.show();
+
         }
 
+    }
+
+    @OnClick (R.id.hourlyButton)
+    public void startHourlyActivity(View view) {
+        Intent intent = new Intent(this,HourlyForecastActivity.class);
+
+
+        if (mForecast!=null) {
+            // Le pasamos los extras al intent
+            intent.putExtra("background",bg);
+            // Le pasamos el array de días con el método getDailyForecast()
+            intent.putExtra(HOURLY_FORECAST,mForecast.getHourlyForecast());
+            // Llamamos a la siguiente actividad
+            startActivity(intent);
+        } else {
+            // Centramos el toast
+            Toast toast = Toast.makeText(this, R.string.please_wait, Toast.LENGTH_LONG);
+            TextView v = (TextView) toast.getView().findViewById(android.R.id.message);
+            if( v != null) v.setGravity(Gravity.CENTER);
+            toast.show();
+
+        }
     }
 
 }

@@ -28,6 +28,7 @@
     <string name="seven_days">DAILY</string>
     <string name="hourly">HOURLY</string>
     <string name="no_city">Please, refresh data</string>
-    <string name="please_wait">Information being acquired, please retry later</string>
+    <string name="please_wait">Information being acquired.\nPlease retry later</string>
+    <string name="title_activity_hourly_forecast">HourlyForecastActivity</string>
 
 </resources>
