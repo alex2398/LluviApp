@@ -5,8 +5,11 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.view.View;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.avalladares.lluviapp.R;
 import com.avalladares.lluviapp.adapters.DayAdapter;
@@ -25,6 +28,7 @@ public class DailyForecastActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         // Aquí es donde indicamos el activity que vamos a rellenar
         setContentView(R.layout.activity_daily_forecast);
+
 
         // Datos que recibimos de MainActivity en el intent
 
@@ -63,6 +67,20 @@ public class DailyForecastActivity extends ListActivity {
 
         setListAdapter(adapter);
 
+
+    }
+
+    @Override
+    protected void onListItemClick(ListView l, View v, int position, long id) {
+        super.onListItemClick(l, v, position, id);
+
+        String dayOfTheWeek = mDays[position].getDayOfTheWeek();
+        String conditions = mDays[position].getSummary();
+        String highTemp = mDays[position].getTemperatureMax() + "";
+
+        String message = String.format("El %s la maxima sera de %s \n y estara %s", dayOfTheWeek, highTemp, conditions);
+
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
 
     }
 }

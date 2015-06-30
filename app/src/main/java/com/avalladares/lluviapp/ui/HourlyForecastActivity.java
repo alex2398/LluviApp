@@ -18,12 +18,12 @@ import java.util.Arrays;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
-public class HourlyForecastActivity extends ActionBarActivity {
 
-    private Hour[] mHours;
+public class HourlyForecastActivity extends ActionBarActivity {
 
     @InjectView(R.id.recyclerView)
     RecyclerView mRecyclerView;
+    private Hour[] mHours;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,13 +42,11 @@ public class HourlyForecastActivity extends ActionBarActivity {
         Parcelable[] parcelables = intent.getParcelableArrayExtra(MainActivity.HOURLY_FORECAST);
         mHours = Arrays.copyOf(parcelables,parcelables.length,Hour[].class);
 
-        HourAdapter adapter = new HourAdapter(mHours);
-        mRecyclerView.setAdapter(adapter);
+        HourAdapter adapter = new HourAdapter(this, mHours);
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(layoutManager);
 
-        mRecyclerView.setHasFixedSize(true);
 
     }
 

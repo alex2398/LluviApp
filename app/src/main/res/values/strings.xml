@@ -7,7 +7,7 @@
     <string name="error_Message">Sorry, there was an error</string>
     <string name="ok_Button">OK</string>
     <string name="noNetworkMessage">Network is unavailable!</string>
-    <string name="google_maps_key" translatable="false" templateMergeStrategy="preserve">
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">
         AIzaSyARl4U-xix47FwZlPNOeYWDjp7yDr3Wpfs
     </string>
     <string name="openstreemaps_key" translatable="false">c5dd7f562e2145c8ea2bb1a2949ce44f</string>
@@ -15,13 +15,13 @@
     <string name="wunderground_key" translatable="false">06caca00a568524f</string>
     <string name="humidity">HUMIDITY</string>
     <string name="rain_probability">RAIN PROB.</string>
-    <string name="getting_data">Collecting data ...</string>
+    <string name="getting_data">Collecting data …</string>
     <string name="last_update">Last update: </string>
     <string name="error_message">Sorry! there was an error</string>
     <string name="error_location">Can\'t get location</string>
     <string name="feelslike">Feels Like</string>
-    <string name="title_activity_splash_screen">SplashScreen</string>
-    <string name="title_activity_daily_forecast">DailyForecastActivity</string>
+    <string name="title_activity_splash_screen" translatable="false">LluviApp</string>
+    <string name="title_activity_daily_forecast" translatable="false">LluviApp</string>
     <string name="no_daily_forecast_data">There is no data to display</string>
     <string name="This_week_weather">This week\'s weather</string>
     <string name="Today">today</string>
@@ -29,6 +29,8 @@
     <string name="hourly">HOURLY</string>
     <string name="no_city">Please, refresh data</string>
     <string name="please_wait">Information being acquired.\nPlease retry later</string>
-    <string name="title_activity_hourly_forecast">HourlyForecastActivity</string>
+    <string name="title_activity_hourly_forecast" translatable="false">LluviApp</string>
+    <string name="hour_item_click" translatable="false">At \%%s  it will be %s and \%%s</string>
+    <string name="daily_item_click" translatable="false">On \%%s the high will be \%%s and it will be %s</string>
 
 </resources>

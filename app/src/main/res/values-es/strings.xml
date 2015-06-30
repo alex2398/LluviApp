@@ -7,7 +7,7 @@
     <string name="noNetworkMessage">Conexión a internet no disponible</string>
     <string name="humidity">HUMEDAD</string>
     <string name="rain_probability">PROB. LLUVIA</string>
-    <string name="getting_data">Obteniendo datos ...</string>
+    <string name="getting_data">Obteniendo datos …</string>
     <string name="last_update">Ultima actualizacion: </string>
     <string name="error_message">Sorry! there was an error</string>
     <string name="error_location">No se puede obtener ubicación</string>
@@ -19,5 +19,7 @@
     <string name="hourly">HORAS</string>
     <string name="no_city">Refrescar los datos</string>
     <string name="please_wait">Actualizando,\npor favor intentelo mas tarde</string>
+    <string name="hour_item_click"></string>
+    <string name="daily_item_click"></string>
 
 </resources>
