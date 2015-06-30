@@ -24,7 +24,7 @@
     <string name="title_activity_daily_forecast">DailyForecastActivity</string>
     <string name="no_daily_forecast_data">There is no data to display</string>
     <string name="This_week_weather">This week\'s weather</string>
-    <string name="Today">Today</string>
+    <string name="Today">today</string>
     <string name="seven_days">DAILY</string>
     <string name="hourly">HOURLY</string>
     <string name="no_city">Please, refresh data</string>

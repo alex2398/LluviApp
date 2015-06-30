@@ -14,7 +14,7 @@
     <string name="feelslike">Feels Like</string>
     <string name="no_daily_forecast_data">No hay datos para mostrar</string>
     <string name="This_week_weather">Esta semana</string>
-    <string name="Today">Hoy</string>
+    <string name="Today">hoy</string>
     <string name="seven_days">7 DIAS</string>
     <string name="hourly">HORAS</string>
     <string name="no_city">Refrescar los datos</string>
