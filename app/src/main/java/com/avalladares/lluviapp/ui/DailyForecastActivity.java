@@ -76,7 +76,7 @@ public class DailyForecastActivity extends ListActivity {
 
         String dayOfTheWeek = mDays[position].getDayOfTheWeek();
         String conditions = mDays[position].getSummary();
-        String highTemp = mDays[position].getTemperatureMax() + "";
+        String highTemp = mDays[position].getTemperatureMax() + "ºC";
 
         String message = String.format("El %s la maxima sera de %s \n y estara %s", dayOfTheWeek, highTemp, conditions);
 

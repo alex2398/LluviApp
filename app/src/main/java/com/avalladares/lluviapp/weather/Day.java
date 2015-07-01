@@ -13,15 +13,38 @@ import java.util.TimeZone;
 
 //Implementamos la clase para que sea parcelable (empaquetar datos)
 public class Day implements Parcelable {
+    // Implementamos un objeto Creator
+    public static final Creator<Day> CREATOR = new Creator<Day>() {
+        @Override
+        public Day createFromParcel(Parcel source) {
+
+            return new Day(source);
+        }
+
+        @Override
+        public Day[] newArray(int size) {
+            return new Day[size];
+        }
+    };
     private double mTime;
     private String mSummary;
     private String mIcon;
     private double mTemperatureMax;
     private String mTimezone;
-
     public Day() {
 
     }
+
+    // Método para leer los valores (tienen que ir en el mismo orden que el anterior)(desempaquetar)
+    private Day(Parcel in) {
+        mTimezone = in.readString();
+        mTime = in.readDouble();
+        mSummary = in.readString();
+        mTemperatureMax = in.readDouble();
+        mIcon = in.readString();
+
+    }
+
     public double getTime() {
         return mTime;
     }
@@ -46,7 +69,7 @@ public class Day implements Parcelable {
         mIcon = icon;
     }
 
-    public double getTemperatureMax() {
+    public int getTemperatureMax() {
 
         return (int) Math.round(mTemperatureMax);
     }
@@ -64,9 +87,13 @@ public class Day implements Parcelable {
         mTimezone = timezone;
     }
 
+    // Métodos de la clase parcelable, que nos permite pasar arrays entre actividades en el intent
+
     public int getIconId() {
         return Forecast.getIconId(mIcon);
     }
+
+    // Método para escribir los valores en el destino (empaquetar)
 
     public String getDayOfTheWeek() {
         SimpleDateFormat formatter = new SimpleDateFormat("EEEE");
@@ -77,14 +104,10 @@ public class Day implements Parcelable {
 
     }
 
-    // Métodos de la clase parcelable, que nos permite pasar arrays entre actividades en el intent
-
     @Override
     public int describeContents() {
         return 0;
     }
-
-    // Método para escribir los valores en el destino (empaquetar)
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
@@ -95,28 +118,4 @@ public class Day implements Parcelable {
         dest.writeString(mIcon);
 
     }
-
-    // Método para leer los valores (tienen que ir en el mismo orden que el anterior)(desempaquetar)
-    private Day (Parcel in) {
-        mTimezone = in.readString();
-        mTime = in.readDouble();
-        mSummary = in.readString();
-        mTemperatureMax = in.readDouble();
-        mIcon = in.readString();
-
-    }
-
-    // Implementamos un objeto Creator
-    public static final Creator<Day> CREATOR = new Creator<Day>() {
-        @Override
-        public Day createFromParcel(Parcel source) {
-
-            return new Day(source);
-        }
-
-        @Override
-        public Day[] newArray(int size) {
-            return new Day[size];
-        }
-    };
 }

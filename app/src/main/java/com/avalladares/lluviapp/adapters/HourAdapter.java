@@ -89,7 +89,7 @@ public class HourAdapter extends RecyclerView.Adapter<HourAdapter.HourViewHolder
             String time = mTimeLabel.getText().toString();
             String temperature = mTemperatureLabel.getText().toString();
             String conditions = mSummaryLabel.getText().toString();
-            String message = String.format("El %s la maxima sera de %s\n y estara %s", time, temperature, conditions);
+            String message = String.format("El %s la maxima sera de %sC\n y estara %s", time, temperature, conditions);
 
             Toast.makeText(mContext, message, Toast.LENGTH_LONG).show();
         }
